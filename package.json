@@ -1,0 +1,43 @@
+{
+  "name": "watcher",
+  "version": "0.0.1",
+  "description": "DOM mutation watcher library",
+  "author": "James Skinner <spiralx@gmail.com> (https://github.com/spiralx)",
+  "license": "MIT",
+  "homepage": "https://github.com/spiralx/watcher",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/spiralx/watcher.git"
+  },
+  "bugs": {
+    "url": "https://github.com/spiralx/watcher/issues"
+  },
+  "keywords": [
+    "dom",
+    "watcher",
+    "mutationobserver",
+    "mutationevent",
+    "mutations",
+    "observe"
+  ],
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack -w"
+  },
+  "devDependencies": {
+    "css-loader": "^0.25.0",
+    "expose-loader": "^0.7.1",
+    "html-webpack-plugin": "^2.22.0",
+    "nib": "^1.1.2",
+    "pug": "^2.0.0-beta6",
+    "pug-loader": "^2.3.0",
+    "style-loader": "^0.13.1",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^2.3.1",
+    "ts-loader": "^0.8.2",
+    "tslint": "^5.4.3",
+    "tslint-config-standard": "^6.0.1",
+    "typescript": "^2.4.1",
+    "webpack": "^3.0.0"
+  }
+}

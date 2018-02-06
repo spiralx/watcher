@@ -1,0 +1,14 @@
+coverage/
+dist/
+
+node_modules/
+
+attic/
+misc/
+
+.DS_Store
+.vscode
+.idea
+
+*.log
+*.bak
