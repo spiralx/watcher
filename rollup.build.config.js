@@ -1,12 +1,8 @@
 import typescript from 'rollup-plugin-typescript2'
-import copy from 'rollup-plugin-copy'
-import browsersync from 'rollup-plugin-browsersync'
-
-import readPkg from 'read-pkg'
 
 // --------------------------------------------------------------------
 
-const pkg = readPkg.sync()
+const pkg = require('./package.json')
 
 // --------------------------------------------------------------------
 
@@ -14,14 +10,7 @@ export default {
   input: 'src/index.ts',
 
   plugins: [
-    typescript(),
-    copy({
-      'dist/watcher.umd.js': 'demo/js/watcher.js',
-      verbose: true
-    }),
-    browsersync({
-      server: 'demo'
-    })
+    typescript()
   ],
 
   output: [
