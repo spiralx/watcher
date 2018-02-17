@@ -1,12 +1,24 @@
 
 // ----------------------------------------------------
 
-export function getMatchingElements (element: HTMLElement, selector: string): HTMLElement[] {
-  return (element.matches(selector) ? [ element ] : []).concat(Array.from(element.querySelectorAll(selector)) as HTMLElement[])
+export type SelectorFunc = (element: HTMLElement) => HTMLElement[]
+
+// ----------------------------------------------------
+
+export function getSelectorFunction (selector: string): SelectorFunc {
+  return function (element: HTMLElement): HTMLElement[] {
+    const matches: HTMLElement[] = []
+
+    if (element.matches(selector)) {
+      matches.push(element)
+    }
+
+    return matches.concat(Array.from(element.querySelectorAll(selector)))
+  }
 }
 
 // ----------------------------------------------------
 
 export function getElementNodes (nodes: Node[]): HTMLElement[] {
-  return nodes.filter(node => node instanceof Element) as HTMLElement[]
+  return nodes.filter(node => node instanceof HTMLElement) as HTMLElement[]
 }

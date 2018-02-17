@@ -1,4 +1,3 @@
-export const RESET = 'color: black; background: white; font-weight: normal; font-style: normal; text-decoration: none'
 export const INV = 'color: white; background: black'
 export const ERROR = 'font-weight: bold; color: #f4f'
 export const LINK = 'color: #05f; font-weight: normal; text-decoration: underline'

@@ -1,16 +1,54 @@
-import { RESET, BOLD, KW, ATTR, VAL, LINK } from './styles'
+import { BOLD, KW, ATTR, VAL, LINK } from './styles'
 
-import { getMatchingElements, getElementNodes } from './dom'
+import { SelectorFunc, getSelectorFunction, getElementNodes } from './dom'
+
+// ----------------------------------------------------------
+
+export type ElementChangeHandlerFunc = (added: HTMLElement[], removed: HTMLElement[]) => void
+
+export interface WatchMap {
+  [ selector: string ]: Watch
+}
+
+// ----------------------------------------------------------
+
+export class Watch {
+  selector: SelectorFunc
+
+  constructor (
+    public readonly cssSelector: string,
+    private callback: ElementChangeHandlerFunc,
+    private context: Object = {}
+  ) {
+    this.selector = getSelectorFunction(this.cssSelector)
+  }
+
+  invoke (added: Element[], removed: Element[]): void {
+    this.callback.call(this.context, added, removed)
+  }
+
+  dump () {
+    console.groupCollapsed(`%cWatch(%cselector: %c"${this.cssSelector}"%c)`, KW, ATTR, LINK, KW)
+    console.log(this.callback.toString())
+    if (this.context) {
+      console.dir(this.context)
+    }
+    console.groupEnd()
+  }
+}
 
 // ----------------------------------------------------------
 
 export default class Watcher {
 
-  observer: MutationObserver
+  observer: MutationObserver | null = null
 
   watches: WatchMap = {}
 
-  constructor (private readonly root: HTMLElement = document.body, private readonly debug: boolean = false) {
+  constructor (
+    private readonly root: HTMLElement = document.body,
+    private readonly debug: boolean = false
+  ) {
     if (!(root instanceof HTMLElement)) {
       throw new TypeError('Watch root is not a valid HTML element!')
     }
@@ -18,16 +56,17 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  add (selector: string, callback: Function, context: Object = {}): Watcher {
+  add (selector: string, callback: ElementChangeHandlerFunc, context: Object = {}): Watcher {
     if (this.debug) {
-      console.info(`%cWatcher.add(%c${selector}%c, %o, %c${this.count} watches%c)%c`,
-                   KW, LINK, KW, context || {}, VAL, KW, RESET)
+      console.groupCollapsed(`%cWatcher.add(%c${selector}%c, %c${this.count} watches%c)`, KW, LINK, KW, VAL, KW)
       console.log(callback.toString())
+      if (context) {
+        console.dir(context)
+      }
+      console.groupEnd()
     }
 
-    context = Object.assign({}, context, { selector })
-
-    this.watches[selector] = callback.bind(context)
+    this.watches[ selector ] = new Watch(selector, callback, context)
 
     return this
   }
@@ -40,21 +79,28 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
+  getAllMatchingElements (selector: SelectorFunc, rootElements: HTMLElement[]) {
+    rootElements.map(selector)
+  }
+
+  // ----------------------------------------------------
+
   processSummary (summary: MutationRecord): void {
     if (this.debug) {
-      console.info(`%cWatcher.processSummary(%ctype=%c${summary.type}%c, %o)%c`,
-                   KW, ATTR, VAL, KW, summary, RESET)
+      console.groupCollapsed(`%cWatcher.processSummary(%ctype=%c${summary.type}%c)`, KW, ATTR, VAL, KW)
+      console.dir(summary)
+      console.groupEnd()
     }
 
     const addedElements: HTMLElement[] = getElementNodes(Array.from(summary.addedNodes))
     const removedElements: HTMLElement[] = getElementNodes(Array.from(summary.removedNodes))
 
-    for (const selector in this.watches) {
-      const matchingAdded: Set<HTMLElement> = new Set(addedElements.reduce((res, elem) => res.concat(getMatchingElements(elem, selector)), []))
-      const matchingRemoved: Set<HTMLElement> = new Set(removedElements.reduce((res, elem) => res.concat(getMatchingElements(elem, selector)), []))
+    for (const watch of Object.values(this.watches)) {
+      const matchingElementsAdded = new Set<HTMLElement>(addedElements.map(watch.selector).reduce((out, elems) => [ ...out, ...elems ], []))
+      const matchingElementsRemoved = new Set<HTMLElement>(addedElements.map(watch.selector).reduce((out, elems) => [ ...out, ...elems ], []))
 
-      if (matchingAdded.size || matchingRemoved.size) {
-        this.watches[selector]([...matchingAdded], [...matchingRemoved])
+      if (matchingElementsAdded.size || matchingElementsRemoved.size) {
+        watch.invoke([ ...matchingElementsAdded ], [ ...matchingElementsRemoved ])
       }
     }
   }
@@ -65,6 +111,8 @@ export default class Watcher {
     return !!this.observer
   }
 
+  // ----------------------------------------------------
+
   get count (): number {
     return Object.keys(this.watches).length
   }
@@ -73,18 +121,16 @@ export default class Watcher {
 
   start (): Watcher {
     if (this.debug) {
-      const { enabled, count } = this
-      console.info(`%cWatcher.start(%cenabled = %c${enabled ? 'true' : 'false'}%c, %c${count} watches%c)%c`,
-                   KW, ATTR, VAL, KW, VAL, KW, RESET)
+      console.info(`%cWatcher.start(%cenabled = %c${this.enabled ? 'true' : 'false'}%c, %c${this.count} watches%c)`, KW, ATTR, VAL, KW, VAL, KW)
     }
 
     if (!this.observer) {
       // Check for existing elements, pass to callback
-      for (const selector in this.watches) {
-        const matchingAdded = getMatchingElements(this.root, selector)
+      for (const watch of Object.values(this.watches)) {
+        const matchingAdded = watch.selector(this.root)
 
         if (matchingAdded.length) {
-          this.watches[selector](matchingAdded, [])
+          watch.invoke(matchingAdded, [])
         }
       }
 

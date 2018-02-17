@@ -1,5 +1,4 @@
 
-
 // ----------------------------------------------------------------------------
 
 /**
@@ -10,18 +9,18 @@
  * ignore further calls until delay ms after further calls have
  * stopped.
  */
-export default function debounce(func: Function, interval: number = 100, immediate: boolean = false): Function {
-  let timeout = null
+export default function debounce (func: Function, interval: number = 100, immediate: boolean = false): Function {
+  let timeout: number
 
-  return function debounced(...args) {
-    const fn = func.bind(this)
+  return function debounced (...args: any[]) {
+    // const fn = func.bind(this)
 
-    function afterThreshold() {
+    function afterThreshold () {
       if (!immediate) {
-        fn(...args)
+        func(...args)
       }
 
-      timeout = null
+      timeout = 0
     }
 
     const callNow = immediate && !timeout
@@ -30,7 +29,7 @@ export default function debounce(func: Function, interval: number = 100, immedia
     timeout = window.setTimeout(afterThreshold, interval)
 
     if (callNow) {
-      fn(...args)
+      func(...args)
     }
   }
 }

@@ -1,4 +1,4 @@
-/// <reference path="./interfaces.d.ts" />
+import './interfaces'
 
 import Watcher from './watcher'
 

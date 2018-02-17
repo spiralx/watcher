@@ -6,6 +6,7 @@ node_modules/
 attic/
 misc/
 
+.rpt2_cache
 .DS_Store
 .vscode
 .idea
