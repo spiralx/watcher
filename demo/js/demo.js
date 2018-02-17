@@ -1,4 +1,4 @@
-/* global Watcher, DEFAULT_DATA */
+/* global Watcher, DATA_SETS */
 
 // --------------------------------------------------------
 
@@ -116,7 +116,7 @@ $(function () {
     return initialiseTreeView(data)
   }
 
-  let { $tree, treeView } = initialiseTreeView(DEFAULT_DATA)
+  let { $tree, treeView } = initialiseTreeView(DATA_SETS.DEFAULT_DATA)
 
   console.info(`$tree, treeView`)
   console.dir($tree)
@@ -198,10 +198,10 @@ $(function () {
   $('.btn-restart-tree').on('click', function (e) {
     const dataset = $(this).data('set')
 
-    if (window[ dataset ]) {
+    if (DATA_SETS.hasOwnProperty(dataset)) {
       $log(`Reloading tree with data set ${dataset}`)
 
-      reinitialiseTreeView(window[ dataset ])
+      reinitialiseTreeView(DATA_SETS[ dataset ])
     } else {
       $log(`No data set ${dataset} exists!`)
     }

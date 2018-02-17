@@ -54,8 +54,7 @@
       "demo/data.js"
     ],
     "globals": [
-      "DEFAULT_DATA",
-      "ALTERNATE_DATA",
+      "DATA_SETS",
       "Watcher"
     ]
   }

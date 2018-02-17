@@ -110,3 +110,10 @@ const ALTERNATE_DATA = [
     tags: ['available', '0']
   }
 ]
+
+// ----------------------------------------------------------
+
+window.DATA_SETS = {
+  DEFAULT_DATA,
+  ALTERNATE_DATA
+}
