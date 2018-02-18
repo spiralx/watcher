@@ -1,7 +1,3 @@
-import l from './l'
-
-// ----------------------------------------------------------
-
 export type Attributes = string | { [ name: string ]: any }
 
 // ----------------------------------------------------------
@@ -54,13 +50,19 @@ export function EL (definition: string, ...children: ELChild[]): Element
  * @return {Element} - constructed element
  */
 export default function EL (definition: string, attributes: Attributes | ELChild, ...children: ELChild[]): HTMLElement {
-  // l(definition, attributes, children)
+  // console.group(`%c${definition}`, BOLD)
+  // console.info(`%cattrs = ${JSON.stringify(attributes, null, 2)}`, INV)
+  // // console.info(`%cdata = ${JSON.stringify(data, null, 2)}%c`, INV, RESET)
+  // if (children) {
+  //   console.table(children)
+  // }
+  // console.groupEnd()
 
   const element = parseDefinition(definition)
 
   if (typeof attributes === 'string') {
     element.textContent = attributes
-  } else if (Array.isArray(attributes)  || attributes instanceof Element) {
+  } else if (Array.isArray(attributes) || attributes instanceof Element) {
     children = [ attributes, ...children ]
   } else if (typeof attributes === 'object') {
     setAttributes(element, attributes)

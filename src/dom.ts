@@ -1,7 +1,4 @@
-
-// ----------------------------------------------------
-
-export type SelectorFunc = (element: HTMLElement) => HTMLElement[]
+import { SelectorFunc } from './interfaces'
 
 // ----------------------------------------------------
 
