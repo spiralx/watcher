@@ -20,7 +20,12 @@ export default {
       verbose: true
     }),
     browsersync({
-      server: 'demo'
+      server: 'demo',
+      files: [
+        'demo/index.html',
+        'demo/css/*.css',
+        'demo/js/*.js'
+      ]
     })
   ],
 
