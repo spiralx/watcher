@@ -12,6 +12,7 @@ const TREE_OPTIONS = {
   backColor: '#111',
   borderColor: '#ccc',
   showBorder: false,
+  showIcon: true,
   selectedIcon: 'glyphicon glyphicon-ok',
   selectedColor: 'yellow',
   selectedBackColor: '#333',
@@ -20,8 +21,10 @@ const TREE_OPTIONS = {
 
 // --------------------------------------------------------
 
-function getCallback (selector) {
+function getCallback (selector, logger) {
   return (added, removed) => {
+    logger(`<p><span style="${KW}">${selector}:</span> added <span style="${VAL}">${added.length}</span>, removed <span style="${VAL}">${removed.length}</span></p>`)
+
     console.group(`%cCallback(%c"${selector}"%c: added %c${added.length}%c, removed %c${removed.length}%c)`,
       KW, LINK, KW, VAL, KW, VAL, KW)
     console.dir(added)
@@ -35,8 +38,9 @@ function getCallback (selector) {
 // --------------------------------------------------------
 
 class DemoRunner {
-  constructor ($tree) {
+  constructor ($tree, $log) {
     this.$tree = $tree
+    this.$log = $log
 
     this._watcher = null
   }
@@ -44,7 +48,7 @@ class DemoRunner {
   init () {
     this._watcher = new Watcher(document.getElementById('content'), true)
 
-    this._watcher.add('.list-group-item', getCallback('.list-group-item'))
+    this._watcher.add('.list-group-item', getCallback('.list-group-item', this.$log))
   }
 
   get watching () {
@@ -94,15 +98,19 @@ $(function () {
   // --------------------------------------------------------
 
   function initialiseTreeView (data) {
+    const handlers = names => names.split(' ')
+      .map(name => name[0].toUpperCase() + name.substr(1))
+      .reduce((out, name) => ({
+        ...out,
+        [ 'onNode' + name ]: (event, node) => {
+          $log(`<p><span style="${KW}">${name}:</span> <span style="${VAL}">${node.text}</span></p>`)
+        }
+      }), {})
+
     const $tree = $('#treeview').treeview({
       data,
       ...TREE_OPTIONS,
-      onNodeCollapsed (event, node) {
-        $log(`Collapsed: ${node.text}`)
-      },
-      onNodeExpanded (event, node) {
-        $log(`Expanded: ${node.text}`)
-      }
+      ...handlers(`selected unselected expanded collapsed enabled disabled checked unchecked searchComplete searchCleared`)
     })
 
     const treeView = $tree.treeview(true)
@@ -127,7 +135,7 @@ $(function () {
   function findExpandibleNodes () {
     return $tree.treeview('search', [
       $('#input-expand-node').val(),
-      { ignoreCase: false, exactMatch: false }
+      { ignoreCase: true, exactMatch: false }
     ])
   }
 
@@ -142,7 +150,7 @@ $(function () {
   })
 
   $('#chk-expand-silent').on('click', function (e) {
-    silent = $(this).val()
+    silent = $(this).prop('checked')
     $log(`Set SILENT to ${silent}.`)
   })
 
@@ -155,31 +163,23 @@ $(function () {
   })
 
   $('#btn-expand-node.expand-node').on('click', function (e) {
-    treeView.expandNode(findExpandibleNodes(), { level, silent })
-    // doTreeAction('expandNode', true)
+    treeView.expandNode(findExpandibleNodes(), { levels, silent })
   })
 
   $('#btn-collapse-node.expand-node').on('click', function (e) {
     treeView.collapseNode(findExpandibleNodes(), { silent })
-    // doTreeAction('collapseNode')
   })
 
   $('#btn-toggle-expanded.expand-node').on('click', function (e) {
     treeView.toggleNodeExpanded(findExpandibleNodes(), { silent })
-    // doTreeAction('toggleNodeExpanded')
   })
 
   // Expand/collapse all
   $('#btn-expand-all').on('click', function (e) {
-    const levels = $('#select-expand-node-levels').val()
-    const silent = $('#chk-expand-silent').is(':checked')
-
     treeView.expandAll({ levels, silent })
   })
 
   $('#btn-collapse-all').on('click', function (e) {
-    const silent = $('#chk-expand-silent').is(':checked')
-
     treeView.collapseAll({ silent })
   })
 
@@ -209,6 +209,6 @@ $(function () {
 
   // --------------------------------------------------------
 
-  const Demo = new DemoRunner($tree)
+  const Demo = new DemoRunner($tree, $log)
   window.Demo = Demo
 })

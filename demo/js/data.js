@@ -3,55 +3,64 @@
 
 const DEFAULT_DATA = [
   {
-    text: 'Parent 1',
-    href: '#parent1',
+    text: 'Film',
+    href: '#film',
     selectable: false,
-    tags: ['4'],
+    icon: 'glyphicon glyphicon-film',
+    tags: [ '4' ],
     nodes: [
       {
-        text: 'Child 1',
-        href: '#child1',
+        text: 'Signal',
+        href: '#signal',
         selectable: false,
-        tags: ['2'],
+        icon: 'glyphicon glyphicon-signal',
+        tags: [ '2' ],
         nodes: [
           {
-            text: 'Grandchild 1',
-            href: '#grandchild1',
-            tags: ['0']
+            text: 'Road',
+            href: '#road',
+            icon: 'glyphicon glyphicon-road',
+            tags: [ '0' ]
           },
           {
-            text: 'Grandchild 2',
-            href: '#grandchild2',
-            tags: ['0']
+            text: 'Inbox',
+            href: '#inbox',
+            icon: 'glyphicon glyphicon-inbox',
+            tags: [ '0' ]
           }
         ]
       },
       {
-        text: 'Child 2',
-        href: '#child2',
-        tags: ['0']
+        text: 'Music',
+        href: '#music',
+        icon: 'glyphicon glyphicon-music',
+        tags: [ '0' ]
       }
     ]
   },
   {
-    text: 'Parent 2',
-    href: '#parent2',
-    tags: ['0']
+    text: 'Barcode',
+    href: '#barcode',
+    icon: 'glyphicon glyphicon-barcode',
+    tags: [ '0' ]
   },
   {
-    text: 'Parent 3',
-    href: '#parent3',
-    tags: ['0']
+    text: 'Headphones',
+    href: '#headphones',
+    icon: 'glyphicon glyphicon-headphones',
+    tags: [ '0' ]
   },
   {
-    text: 'Parent 4',
-    href: '#parent4',
-    tags: ['0']
+    text: 'Tags',
+    href: '#tags',
+    icon: 'glyphicon glyphicon-tags',
+    tags: [ '0' ]
   },
   {
-    text: 'Parent 5',
-    href: '#parent5',
-    tags: ['0']
+    text: 'Time',
+    href: '#time',
+    icon: 'glyphicon glyphicon-time',
+    tags: [ '0' ]
   }
 ]
 
@@ -59,55 +68,67 @@ const DEFAULT_DATA = [
 
 const ALTERNATE_DATA = [
   {
-    text: 'Parent 1',
+    text: 'Earphone',
+    icon: 'glyphicon glyphicon-earphone',
+    href: '#demo',
+    tags: [ '11' ]
+  },
+  {
+    text: 'Phone',
     selectable: false,
-    tags: ['2'],
+    icon: 'glyphicon glyphicon-phone',
+    href: '#phone',
+    tags: [ '2' ],
     nodes: [
       {
-        text: 'Child 1',
+        text: 'User',
         selectable: false,
-        tags: ['3'],
+        icon: 'glyphicon glyphicon-user',
+        href: '#user',
+        tags: [ '3' ],
         nodes: [
           {
-            text: 'Grandchild 1',
-            tags: ['6']
+            text: 'Music',
+            icon: 'glyphicon glyphicon-music',
+            href: '#music',
+            tags: [ '6' ]
           },
           {
-            text: 'Grandchild 2',
-            tags: ['3']
+            text: 'Glass',
+            icon: 'glyphicon glyphicon-glass',
+            href: '#glass',
+            tags: [ '3' ]
           }
         ]
       },
       {
-        text: 'Child 2',
-        tags: ['3']
+        text: 'Print',
+        icon: 'glyphicon glyphicon-print',
+        href: '#print',
+        tags: [ '3' ]
       }
     ]
   },
   {
-    text: 'Parent 2',
-    tags: ['7']
+    text: 'Cloud',
+    icon: 'glyphicon glyphicon-cloud',
+    href: '#cloud',
+    tags: [ '7' ]
   },
   {
-    text: 'Parent 3',
-    icon: 'glyphicon glyphicon-earphone',
-    href: '#demo',
-    tags: ['11']
-  },
-  {
-    text: 'Parent 4',
+    text: 'Cloud',
     icon: 'glyphicon glyphicon-cloud-download',
     href: '/demo.html',
-    tags: ['19'],
+    tags: [ '19' ],
     selected: true
   },
   {
-    text: 'Parent 5',
+    text: 'Certificate',
     icon: 'glyphicon glyphicon-certificate',
     color: 'pink',
     backColor: 'red',
     href: 'http://www.tesco.com',
-    tags: ['available', '0']
+    tags: [ 'available', '0' ]
   }
 ]
 
