@@ -1,35 +1,25 @@
 import typescript from 'rollup-plugin-typescript2'
-import copy from 'rollup-plugin-copy'
+// import copy from 'rollup-plugin-copy'
+import execute from 'rollup-plugin-execute'
 import browsersync from 'rollup-plugin-browsersync'
-
-import readPkg from 'read-pkg'
 
 // --------------------------------------------------------------------
 
-const pkg = readPkg.sync()
+const pkg = require('./package.json')
 
 // --------------------------------------------------------------------
 
 export default {
   input: 'src/index.ts',
 
-  plugins: [
-    typescript(),
-    copy({
-      'dist/watcher.umd.js': 'demo/js/watcher.js',
-      verbose: true
-    }),
-    browsersync({
-      server: 'demo',
-      files: [
-        'demo/index.html',
-        'demo/css/*.css',
-        'demo/js/*.js'
-      ]
-    })
-  ],
-
   output: [
+    {
+      format: 'umd',
+      file: pkg.browser,
+      name: 'Watcher',
+      sourcemap: 'inline'
+    },
+
     {
       format: 'cjs',
       file: pkg.main,
@@ -40,13 +30,26 @@ export default {
       format: 'es',
       file: pkg.module,
       sourcemap: true
-    },
-
-    {
-      format: 'umd',
-      file: pkg.browser,
-      name: 'Watcher',
-      sourcemap: 'inline'
     }
-  ]
+  ],
+
+  plugins: [
+    typescript(),
+    // copy({
+    //   'dist/watcher.umd.js': 'demo/js/watcher.js'
+    // }),
+    execute('cp dist/watcher.umd.js demo/watcher.js'),
+    browsersync({
+      server: 'demo',
+      files: [
+        'demo/index.html',
+        'demo/css/*.css',
+        'demo/js/*.js'
+      ]
+    })
+  ],
+
+  watch: {
+    clearScreen: false
+  }
 }

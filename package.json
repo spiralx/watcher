@@ -24,8 +24,8 @@
     "observe"
   ],
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "rollup -c",
+    "notprebuild": "rimraf dist",
+    "build": "rollup -c rollup.build.config.js",
     "watch": "rollup -c -w",
     "build-prod": "rollup -c rollup.production.config.js",
     "lint": "tslint -c ./tslint.json src/*.ts",
@@ -41,9 +41,10 @@
     "jquery": "^3.3.1",
     "recursive-copy": "^2.0.9",
     "rimraf": "^2.6.2",
-    "rollup": "^0.55.3",
+    "rollup": "^0.56.2",
     "rollup-plugin-browsersync": "^0.2.6",
     "rollup-plugin-copy": "^0.2.3",
+    "rollup-plugin-execute": "^1.0.0",
     "rollup-plugin-typescript2": "^0.11.0",
     "tslint": "^5.9.1",
     "tslint-config-standard": "^7.0.0",

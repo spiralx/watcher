@@ -22,15 +22,30 @@ const TREE_OPTIONS = {
 // --------------------------------------------------------
 
 function getCallback (selector, logger) {
-  return (added, removed) => {
-    logger(`<p><span style="${KW}">${selector}:</span> added <span style="${VAL}">${added.length}</span>, removed <span style="${VAL}">${removed.length}</span></p>`)
+  return ({ added, removed }) => {
+    logger(`
+      <p>
+        <span style="${KW}">${selector}:</span>
+        added <span style="${VAL}">${added.length}</span>,
+        removed <span style="${VAL}">${removed.length}</span>
+      </p>`
+    )
 
     console.group(`%cCallback(%c"${selector}"%c: added %c${added.length}%c, removed %c${removed.length}%c)`,
       KW, LINK, KW, VAL, KW, VAL, KW)
-    console.dir(added)
-    console.dir(removed)
-    // console.table(added)//.map(t => { const a = t.querySelector('.title'); return { title: a.textContent, url: a.href } }))
-    // console.table(removed)//.map(t => { const a = t.querySelector('.title'); return { title: a.textContent, url: a.href } }))
+
+    if (added.length > 0) {
+      console.group('Added')
+      added.forEach(elem => console.log(elem))
+      console.groupEnd()
+    }
+
+    if (removed.length > 0) {
+      console.group('Removed')
+      removed.forEach(elem => console.log(elem))
+      console.groupEnd()
+    }
+
     console.groupEnd()
   }
 }
@@ -48,7 +63,10 @@ class DemoRunner {
   init () {
     this._watcher = new Watcher(document.getElementById('content'), true)
 
-    this._watcher.add('.list-group-item', getCallback('.list-group-item', this.$log))
+    const watch = this._watcher.add('.list-group-item', getCallback('.list-group-item', this.$log))
+
+    console.info(`Watch:`)
+    console.dir(watch)
   }
 
   get watching () {

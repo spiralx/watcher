@@ -2026,6 +2026,10 @@ rollup-plugin-copy@^0.2.3:
     colors "^1.1.2"
     fs-extra "^3.0.0"
 
+rollup-plugin-execute@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-execute/-/rollup-plugin-execute-1.0.0.tgz#cea6445ef5b2655253a6b0b859ecf7c6ef8d08f6"
+
 rollup-plugin-typescript2@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/rollup-plugin-typescript2/-/rollup-plugin-typescript2-0.11.0.tgz#86a23464e5638b9a2320f86fe14822da66e7b190"
@@ -2042,9 +2046,9 @@ rollup-pluginutils@^2.0.1:
     estree-walker "^0.3.0"
     micromatch "^2.3.11"
 
-rollup@^0.55.3:
-  version "0.55.3"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.55.3.tgz#0af082a766d51c3058430c8372442ff5207d8736"
+rollup@^0.56.2:
+  version "0.56.2"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.56.2.tgz#1788cf56d4350b6d8ecf76b5d654c59c7bf9c24a"
 
 rx@4.1.0:
   version "4.1.0"

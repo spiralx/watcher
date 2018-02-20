@@ -1,4 +1,4 @@
-import { SelectorFunc, ElementChangeHandlerFunc } from './interfaces'
+import { SelectorFunc, ElementChangeHandlerFunc, WatchOptions } from './interfaces'
 import { BOLD, KW, ATTR, VAL, LINK } from './styles'
 
 import { Watch } from './watch'
@@ -23,19 +23,21 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  add (selector: string, callback: ElementChangeHandlerFunc, context: Object = {}): Watcher {
+  add (selector: string, callback: ElementChangeHandlerFunc, options: WatchOptions = {}): Watch {
     if (this.debug) {
       console.groupCollapsed(`%cWatcher.add(%c${selector}%c, %c${this.count} watches%c)`, KW, LINK, KW, VAL, KW)
       console.log(callback.toString())
-      if (context) {
-        console.dir(context)
+      if (options) {
+        console.dir(options)
       }
       console.groupEnd()
     }
 
-    this.watchMap.set(selector, new Watch(selector, callback, context))
+    const watch = new Watch(selector, callback, options)
 
-    return this
+    this.watchMap.set(selector, watch)
+
+    return watch
   }
 
   // ----------------------------------------------------
@@ -110,6 +112,7 @@ export default class Watcher {
 
       this.observer.observe(this.root, {
         childList: true,
+        attributes: true,
         subtree: true
       })
     }

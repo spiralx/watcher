@@ -9,11 +9,14 @@ const pkg = require('./package.json')
 export default {
   input: 'src/index.ts',
 
-  plugins: [
-    typescript()
-  ],
-
   output: [
+    {
+      format: 'umd',
+      file: pkg.browser,
+      name: 'Watcher',
+      sourcemap: 'inline'
+    },
+
     {
       format: 'cjs',
       file: pkg.main,
@@ -24,13 +27,14 @@ export default {
       format: 'es',
       file: pkg.module,
       sourcemap: true
-    },
-
-    {
-      format: 'umd',
-      file: pkg.browser,
-      name: 'Watcher',
-      sourcemap: 'inline'
     }
-  ]
+  ],
+
+  plugins: [
+    typescript()
+  ],
+
+  watch: {
+    clearScreen: false
+  }
 }
