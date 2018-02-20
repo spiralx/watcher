@@ -1,11 +1,14 @@
 coverage/
 dist/
+demo/vendor/
+demo/js/watcher.js
 
 node_modules/
 
 attic/
 misc/
 
+.rpt2_cache
 .DS_Store
 .vscode
 .idea
