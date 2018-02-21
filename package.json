@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "dist/watcher.cjs.js",
   "module": "dist/watcher.esm.js",
-  "browser": "dist/watcher.umd.js",
+  "browser": "dist/watcher.js",
   "description": "DOM mutation watcher library",
   "author": "James Skinner <spiralx@gmail.com> (https://github.com/spiralx)",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "observe"
   ],
   "scripts": {
-    "notprebuild": "rimraf dist",
+    "clean": "rimraf dist",
     "build": "rollup -c rollup.build.config.js",
     "watch": "rollup -c -w",
     "build-prod": "rollup -c rollup.production.config.js",
