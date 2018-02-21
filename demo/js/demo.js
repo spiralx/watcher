@@ -63,7 +63,11 @@ class DemoRunner {
   init () {
     this._watcher = new Watcher(document.getElementById('content'), true)
 
-    const watch = this._watcher.add('.list-group-item', getCallback('.list-group-item', this.$log))
+    const callback = getCallback('.list-group-item', this.$log)
+    console.info(`Callback:`)
+    console.dir(callback)
+
+    const watch = this._watcher.add('.list-group-item', callback)
 
     console.info(`Watch:`)
     console.dir(watch)
@@ -106,6 +110,7 @@ $(function () {
   const $output = $('#output')
 
   function $log (text) {
+    console.log(`$log: "${text}"`)
     if (text.match(/^<\w+>/)) {
       $output.prepend(text)
     } else {

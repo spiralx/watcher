@@ -51,7 +51,7 @@ export class Watch {
 
   invoke (added: HTMLElement[], removed: HTMLElement[]): void {
     const changes = {
-      added,
+      this.events.has(WatchEvent.ElementsAdded) && added,
       removed
     }
 
