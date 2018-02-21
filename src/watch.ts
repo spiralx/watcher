@@ -49,17 +49,6 @@ export class Watch {
 
   // ----------------------------------------------------
 
-  invoke (added: HTMLElement[], removed: HTMLElement[]): void {
-    const changes = {
-      this.events.has(WatchEvent.ElementsAdded) && added,
-      removed
-    }
-
-    this.callback.call(this.context, changes)
-  }
-
-  // ----------------------------------------------------
-
   dump () {
     console.groupCollapsed(`%cWatch(%cselector: %c"${this.cssSelector}"%c)`, KW, ATTR, LINK, KW)
     console.log(this.callback.toString())
@@ -68,4 +57,27 @@ export class Watch {
     }
     console.groupEnd()
   }
+}
+
+// ----------------------------------------------------------
+
+export interface ElementChangeResult {
+  added?: HTMLElement[]
+  removed?: HTMLElement[]
+}
+
+// ----------------------------------------------------------
+
+export class ElementChangeWatch extends Watch {
+  // ----------------------------------------------------
+
+  invoke (added: HTMLElement[] | undefined, removed: HTMLElement[] | undefined): void {
+    added = this.events.has(WatchEvent.ElementsAdded) ? added : undefined
+    removed = this.events.has(WatchEvent.ElementsRemoved) ? removed : undefined
+
+    const result: ElementChangeResult = { added, removed }
+
+    this.callback.call(this.context, result)
+  }
+
 }

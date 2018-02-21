@@ -22,27 +22,27 @@ const TREE_OPTIONS = {
 // --------------------------------------------------------
 
 function getCallback (selector, logger) {
-  return ({ added, removed }) => {
+  return result => {
     logger(`
       <p>
         <span style="${KW}">${selector}:</span>
-        added <span style="${VAL}">${added.length}</span>,
-        removed <span style="${VAL}">${removed.length}</span>
+        ${result.added ? `added <span style="${VAL}">${result.added.length}</span>,` : ``}
+        ${result.removed ? `removed <span style="${VAL}">${result.removed.length}</span>` : ``}
       </p>`
     )
 
-    console.group(`%cCallback(%c"${selector}"%c: added %c${added.length}%c, removed %c${removed.length}%c)`,
+    console.group(`%cCallback(%c"${selector}"%c: added %c${result.added.length}%c, removed %c${result.removed.length}%c)`,
       KW, LINK, KW, VAL, KW, VAL, KW)
 
-    if (added.length > 0) {
+    if (result.added && result.added.length > 0) {
       console.group('Added')
-      added.forEach(elem => console.log(elem))
+      result.added.forEach(elem => console.log(elem))
       console.groupEnd()
     }
 
-    if (removed.length > 0) {
+    if (result.removed && result.removed.length > 0) {
       console.group('Removed')
-      removed.forEach(elem => console.log(elem))
+      result.removed.forEach(elem => console.log(elem))
       console.groupEnd()
     }
 
