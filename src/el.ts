@@ -1,11 +1,9 @@
-export type Attributes = string | { [ name: string ]: any }
-
 // ----------------------------------------------------------
 
 function parseDefinition (definition: string): HTMLElement {
   const [ , tag, ...bits ] = definition.split(/\b(?=[\.#])/g)
 
-  const element = document.createElement(tag)
+  const element = document.createElement(tag || 'div')
 
   bits.forEach(v => {
     if (v[0] === '.') {
@@ -20,38 +18,45 @@ function parseDefinition (definition: string): HTMLElement {
 
 // ----------------------------------------------------------
 
-function setAttributes (element: HTMLElement, attributes: { [ prop: string]: any }): HTMLElement {
-  if (attributes.dataset) {
-    Object.assign(element.dataset, attributes.dataset)
-    delete attributes.dataset
+function setProperties (element: HTMLElement, properties: Properties): HTMLElement {
+  if (properties.dataset) {
+    Object.assign(element.dataset, properties.dataset)
+    delete properties.dataset
   }
 
-  if (attributes.style) {
-    Object.assign(element.style, attributes.style)
-    delete attributes.style
+  if (properties.style) {
+    Object.assign(element.style, properties.style)
+    delete properties.style
   }
 
-  return Object.assign(element, attributes)
+  return Object.assign(element, properties)
 }
 
 // ----------------------------------------------------------
 
-export type ELChild = Element | Array<any>
+export type Properties = {
+  [ name: string ]: any
+}
 
-export function EL (definition: string, attributes: Attributes, ...children: ELChild[]): Element
-export function EL (definition: string, ...children: ELChild[]): Element
+export type ELChild = HTMLElement | string | Array<any>
+
+// ----------------------------------------------------------
+
+const getClass = (val: any): string => Object.prototype.toString.call(val).slice(8, -1)
+
+// ----------------------------------------------------------
 
 /**
  * Function to generated nested HTML elements.
  *
  * @param {string} definition - TAG_NAME[#ID]?[.CLASS_NAME]*[#ID]? - create element with id/classes
- * @param {string|Object} [attributes] - if a string, set textContent, otherwise apply all attributes
+ * @param {string|{}} [properties] - if a string, set textContent, otherwise apply all properties
  * @param {Array<Array|Element>} [children] - add children as nodes or the result of another EL
  * @return {Element} - constructed element
  */
-export default function EL (definition: string, attributes: Attributes | ELChild, ...children: ELChild[]): HTMLElement {
+export default function EL (definition: string = 'div', properties?: Properties | ELChild, ...children: ELChild[]): HTMLElement {
   // console.group(`%c${definition}`, BOLD)
-  // console.info(`%cattrs = ${JSON.stringify(attributes, null, 2)}`, INV)
+  // console.info(`%cattrs = ${JSON.stringify(properties, null, 2)}`, INV)
   // // console.info(`%cdata = ${JSON.stringify(data, null, 2)}%c`, INV, RESET)
   // if (children) {
   //   console.table(children)
@@ -60,12 +65,12 @@ export default function EL (definition: string, attributes: Attributes | ELChild
 
   const element = parseDefinition(definition)
 
-  if (typeof attributes === 'string') {
-    element.textContent = attributes
-  } else if (Array.isArray(attributes) || attributes instanceof Element) {
-    children = [ attributes, ...children ]
-  } else if (typeof attributes === 'object') {
-    setAttributes(element, attributes)
+  if (properties) {
+    if (typeof properties === 'object' && !Array.isArray(properties)) {
+      setProperties(element, properties)
+    } else {
+      children.unshift(properties)
+    }
   }
 
   for (const child of children) {

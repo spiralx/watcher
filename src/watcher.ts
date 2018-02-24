@@ -1,8 +1,6 @@
-import { SelectorFunc, ElementChangeHandlerFunc, WatchOptions } from './interfaces'
-import { BOLD, KW, ATTR, VAL, LINK } from './styles'
+import { SelectorFunc, WatchOptions, WatchCallback, Css } from './interfaces'
 
-import { Watch } from './watch'
-import { getSelectorFunction, getElementNodes } from './dom'
+import { Watch, ElementChangeWatch } from './watch'
 
 // ----------------------------------------------------------
 
@@ -10,7 +8,7 @@ export default class Watcher {
 
   observer: MutationObserver | null = null
 
-  watchMap: Map<string, Watch> = new Map()
+  watchMap: Map<string, ElementChangeWatch> = new Map()
 
   constructor (
     private readonly root: HTMLElement = document.body,
@@ -23,9 +21,9 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  add (selector: string, callback: ElementChangeHandlerFunc, options: WatchOptions = {}): Watch {
+  add (options: WatchOptions, callback: WatchCallback): ElementChangeWatch {
     if (this.debug) {
-      console.groupCollapsed(`%cWatcher.add(%c${selector}%c, %c${this.count} watches%c)`, KW, LINK, KW, VAL, KW)
+      console.groupCollapsed(`%cWatcher.add(%c${options.selector}%c, %c${this.count} watches%c)`, Css.Kw, Css.Link, Css.Kw, Css.Val, Css.Kw)
       console.log(callback.toString())
       if (options) {
         console.dir(options)
@@ -33,9 +31,9 @@ export default class Watcher {
       console.groupEnd()
     }
 
-    const watch = new Watch(selector, callback, options)
+    const watch = new ElementChangeWatch(options, callback)
 
-    this.watchMap.set(selector, watch)
+    this.watchMap.set(options.selector, watch)
 
     return watch
   }
@@ -56,21 +54,13 @@ export default class Watcher {
 
   processSummary (summary: MutationRecord): void {
     if (this.debug) {
-      console.groupCollapsed(`%cWatcher.processSummary(%ctype=%c${summary.type}%c)`, KW, ATTR, VAL, KW)
+      console.groupCollapsed(`%cWatcher.processSummary(%ctype=%c${summary.type}%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw)
       console.dir(summary)
       console.groupEnd()
     }
 
-    const addedElements: HTMLElement[] = getElementNodes(Array.from(summary.addedNodes))
-    const removedElements: HTMLElement[] = getElementNodes(Array.from(summary.removedNodes))
-
     for (const watch of this.watches) {
-      const matchingElementsAdded = new Set<HTMLElement>(addedElements.map(watch.selector).reduce((out, elems) => [ ...out, ...elems ], []))
-      const matchingElementsRemoved = new Set<HTMLElement>(addedElements.map(watch.selector).reduce((out, elems) => [ ...out, ...elems ], []))
-
-      if (matchingElementsAdded.size || matchingElementsRemoved.size) {
-        watch.invoke([ ...matchingElementsAdded ], [ ...matchingElementsRemoved ])
-      }
+      watch.processSummary(summary)
     }
   }
 
@@ -88,7 +78,7 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  get watches (): Watch[] {
+  get watches (): ElementChangeWatch[] {
     return [ ...Object.values(this.watchMap) ]
   }
 
@@ -96,15 +86,16 @@ export default class Watcher {
 
   start (): Watcher {
     if (this.debug) {
-      console.info(`%cWatcher.start(%cenabled = %c${this.enabled ? 'true' : 'false'}%c, %c${this.count} watches%c)`, KW, ATTR, VAL, KW, VAL, KW)
+      console.info(`%cWatcher.start(%cenabled = %c${this.enabled ? 'true' : 'false'}%c, %c${this.count} watches%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw, Css.Val, Css.Kw)
     }
 
     if (!this.observer) {
       // Check for existing elements, pass to callback
-      this.watches
-        .map(watch => ({ watch, added: watch.selector(this.root) }))
-        .filter(({ added }) => added.length > 0)
-        .forEach(({ watch, added }) => watch.invoke(added, []))
+      for (const watch of this.watches) {
+        if (watch.findExisting) {
+          watch.processElement(this.root)
+        }
+      }
 
       this.observer = new MutationObserver(summaries => {
         this.processSummaries(summaries)
