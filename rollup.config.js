@@ -3,7 +3,7 @@ import typescript from 'rollup-plugin-typescript2'
 import execute from 'rollup-plugin-execute'
 import browsersync from 'rollup-plugin-browsersync'
 
-import colors from 'colors' // eslint-disable-line no-unused-vars
+require('colors')
 
 // --------------------------------------------------------------------
 
@@ -47,7 +47,8 @@ export default {
         'demo/index.html',
         'demo/css/*.css',
         'demo/js/*.js'
-      ]
+      ],
+      port: 9000
     })
   ],
 

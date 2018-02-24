@@ -1,4 +1,4 @@
-import { SelectorFunc } from './interfaces'
+import { SelectorFunc } from '../interfaces'
 
 // ----------------------------------------------------
 

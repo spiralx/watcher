@@ -1,4 +1,4 @@
-import { Css } from './interfaces'
+import { Css } from '../interfaces'
 
 // ----------------------------------------------------------
 

@@ -1,7 +1,7 @@
 import { WatchEvent, WatchOptions, WatchCallback, SelectorFunc, Css } from './interfaces'
 import { WatchResult } from './watch-result'
 
-import { getSelectorFunction, getElementNodes } from './dom'
+import { getSelectorFunction, getElementNodes } from './utils/dom'
 
 // ----------------------------------------------------
 

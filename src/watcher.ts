@@ -73,13 +73,13 @@ export default class Watcher {
   // ----------------------------------------------------
 
   get count (): number {
-    return Object.keys(this.watchMap).length
+    return this.watchMap.size
   }
 
   // ----------------------------------------------------
 
   get watches (): ElementChangeWatch[] {
-    return [ ...Object.values(this.watchMap) ]
+    return [ ...this.watchMap.values() ]
   }
 
   // ----------------------------------------------------
@@ -103,7 +103,7 @@ export default class Watcher {
 
       this.observer.observe(this.root, {
         childList: true,
-        attributes: true,
+        // attributes: true,
         subtree: true
       })
     }

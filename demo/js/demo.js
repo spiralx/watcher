@@ -61,13 +61,13 @@ class DemoRunner {
   }
 
   init () {
-    this._watcher = new Watcher(document.getElementById('content'), true)
+    this._watcher = window.watcher = new Watcher(document.getElementById('content'), true)
 
     const callback = getCallback('.list-group-item', this.$log)
     console.info(`Callback:`)
     console.dir(callback)
 
-    const watch = this._watcher.add('.list-group-item', callback)
+    const watch = this._watcher.add({ selector: '.list-group-item' }, callback)
 
     console.info(`Watch:`)
     console.dir(watch)

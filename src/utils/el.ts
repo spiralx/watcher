@@ -1,4 +1,3 @@
-// ----------------------------------------------------------
 
 function parseDefinition (definition: string): HTMLElement {
   const [ , tag, ...bits ] = definition.split(/\b(?=[\.#])/g)
