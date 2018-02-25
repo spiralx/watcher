@@ -1,6 +1,7 @@
-import { SelectorFunc, WatchOptions, WatchCallback, Css } from './interfaces'
+import { Css } from './interfaces'
 
-import { Watch, ElementChangeWatch } from './watch'
+import { WatchCallback, Watch } from './watch'
+import { WatchOptions, WatchEvents } from './watch-options'
 
 // ----------------------------------------------------------
 
@@ -8,11 +9,20 @@ export default class Watcher {
 
   observer: MutationObserver | null = null
 
-  watchMap: Map<string, ElementChangeWatch> = new Map()
+  // readonly watcheMap: Map<string, Watch> = new Map()
+  readonly watches: Watch[] = []
+
+  // ----------------------------------------------------
+
+  get [Symbol.toStringTag] () {
+    return 'Watcher'
+  }
+
+  // ----------------------------------------------------
 
   constructor (
-    private readonly root: HTMLElement = document.body,
-    private readonly debug: boolean = false
+    public readonly root: HTMLElement = document.body,
+    public readonly debug: boolean = false
   ) {
     if (!(root instanceof HTMLElement)) {
       throw new TypeError('Watch root is not a valid HTML element!')
@@ -21,9 +31,25 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  add (options: WatchOptions, callback: WatchCallback): ElementChangeWatch {
+  add (callback: WatchCallback): Watch
+  add (options: string | WatchOptions, callback: WatchCallback): Watch
+
+  add (options: string | WatchOptions | WatchCallback, callback?: WatchCallback): Watch {
+    if (typeof options === 'string') {
+      options = {
+        selector: options
+      }
+    } else if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
+
+    if (!callback) {
+      throw new Error('No callback function specified when calling Watcher.add()')
+    }
+
     if (this.debug) {
-      console.groupCollapsed(`%cWatcher.add(%c${options.selector}%c, %c${this.count} watches%c)`, Css.Kw, Css.Link, Css.Kw, Css.Val, Css.Kw)
+      console.groupCollapsed(`%cWatcher.add(selector: %c${options.selector}%c, %c${this.watchCount} watches%c)`, Css.Kw, Css.Link, Css.Kw, Css.Val, Css.Kw)
       console.log(callback.toString())
       if (options) {
         console.dir(options)
@@ -31,24 +57,30 @@ export default class Watcher {
       console.groupEnd()
     }
 
-    const watch = new ElementChangeWatch(options, callback)
+    const watch = new Watch(options, callback)
 
-    this.watchMap.set(options.selector, watch)
+    this.watches.push(watch)
 
     return watch
   }
 
   // ----------------------------------------------------
 
-  processSummaries (summaries: MutationRecord[]): void {
-    summaries.forEach(summary => this.processSummary(summary))
+  get observing (): boolean {
+    return !!this.observer
   }
 
   // ----------------------------------------------------
 
-  getAllMatchingElements (selector: SelectorFunc, rootElements: HTMLElement[]) {
-    rootElements.map(selector)
+  get watchCount (): number {
+    return this.watches.length
   }
+
+  // ----------------------------------------------------
+
+  // get watches (): Watch[] {
+  //   return [ ...this.watchMap.values() ]
+  // }
 
   // ----------------------------------------------------
 
@@ -66,39 +98,25 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  get enabled (): boolean {
-    return !!this.observer
-  }
+  start (): this {
+    if (!this.watchCount) {
+      throw new Error('Cannot start Watcher without any watches!')
+    }
 
-  // ----------------------------------------------------
-
-  get count (): number {
-    return this.watchMap.size
-  }
-
-  // ----------------------------------------------------
-
-  get watches (): ElementChangeWatch[] {
-    return [ ...this.watchMap.values() ]
-  }
-
-  // ----------------------------------------------------
-
-  start (): Watcher {
     if (this.debug) {
-      console.info(`%cWatcher.start(%cenabled = %c${this.enabled ? 'true' : 'false'}%c, %c${this.count} watches%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw, Css.Val, Css.Kw)
+      console.info(`%cWatcher.start(%cenabled = %c${this.observing ? 'true' : 'false'}%c, %c${this.watchCount} watches%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw, Css.Val, Css.Kw)
     }
 
     if (!this.observer) {
       // Check for existing elements, pass to callback
       for (const watch of this.watches) {
-        if (watch.findExisting) {
+        if (watch.findExisting && watch.events & WatchEvents.ElementsAdded) {
           watch.processElement(this.root)
         }
       }
 
       this.observer = new MutationObserver(summaries => {
-        this.processSummaries(summaries)
+        summaries.forEach(summary => this.processSummary(summary))
       })
 
       this.observer.observe(this.root, {
@@ -113,9 +131,9 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  stop (): Watcher {
+  stop (): this {
     if (this.observer) {
-      this.processSummaries(this.observer.takeRecords())
+      this.observer.takeRecords().forEach(summary => this.processSummary(summary))
 
       this.observer.disconnect()
       this.observer = null
@@ -123,5 +141,4 @@ export default class Watcher {
 
     return this
   }
-
 }

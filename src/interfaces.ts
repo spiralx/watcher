@@ -1,6 +1,3 @@
-import { WatchResult } from './watch-result'
-
-// ----------------------------------------------------
 
 interface Console {
   group (groupTitle?: string, ...optionalParams: any[]): void
@@ -21,36 +18,6 @@ export namespace Css {
 
 // ----------------------------------------------------
 
-export enum WatchEvent {
-  ElementsAdded,
-  ElementsRemoved,
-  ElementsChanged,
-  AttributesChanged,
-  TextChanged
-}
-
-// ----------------------------------------------------
-
-export interface WatchOptions {
-  selector: string
-  context?: object
-  findExisting?: boolean
-  event?: WatchEvent
-  events?: WatchEvent[]
-  attribute?: string
-  attributes?: string[]
-}
-
-// ----------------------------------------------------
-
 export interface INode {
   nodes?: INode[]
 }
-
-// ----------------------------------------------------
-
-export type SelectorFunc = (element: HTMLElement) => HTMLElement[]
-
-// ----------------------------------------------------
-
-export type WatchCallback = (result: WatchResult) => void

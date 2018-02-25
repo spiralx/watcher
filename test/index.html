@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <title>Watcher tests</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/mocha@5.0.1/mocha.css">
+
+  </head>
+
+  <body>
+    <div id="test-div"></div>
+    <div id="mocha"></div>
+
+    <!-- <script src="https://unpkg.com/chai@4.1.2/chai.js"></script> -->
+    <script src="https://unpkg.com/should@13.2.1/should.js"></script>
+    <script src="https://unpkg.com/mocha@5.0.1/mocha.js"></script>
+    <script src="../dist/watcher.js"></script>
+
+    <script src="tests.js"></script>
+
+    <script>
+      /* globals mocha */
+      mocha.checkLeaks()
+      // mocha.globals([ 'jQuery' ])
+      mocha.run()
+    </script>
+  </body>
+</html>

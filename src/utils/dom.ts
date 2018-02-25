@@ -1,4 +1,4 @@
-import { SelectorFunc } from '../interfaces'
+import { SelectorFunc } from '../watch'
 
 // ----------------------------------------------------
 
@@ -12,6 +12,12 @@ export function getSelectorFunction (selector: string): SelectorFunc {
 
     return matches.concat(Array.from(element.querySelectorAll(selector)))
   }
+}
+
+// ----------------------------------------------------
+
+export function getElementNodesFromNodeList (nodes: NodeList): HTMLElement[] {
+  return getElementNodes(Array.from(nodes))
 }
 
 // ----------------------------------------------------
