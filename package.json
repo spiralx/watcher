@@ -1,6 +1,9 @@
 {
   "name": "watcher",
   "version": "0.0.1",
+  "main": "dist/watcher.cjs.js",
+  "module": "dist/watcher.esm.js",
+  "browser": "dist/watcher.js",
   "description": "DOM mutation watcher library",
   "author": "James Skinner <spiralx@gmail.com> (https://github.com/spiralx)",
   "license": "MIT",
@@ -21,23 +24,40 @@
     "observe"
   ],
   "scripts": {
-    "build": "webpack",
-    "start": "webpack -w"
+    "clean": "rimraf dist",
+    "build": "rollup -c rollup.build.config.js",
+    "watch": "rollup -c -w",
+    "build-prod": "rollup -c rollup.production.config.js",
+    "build-el": "rollup -c rollup.test.config.js",
+    "lint": "tslint -c ./tslint.json src/*.ts",
+    "start": "rollup -c -w"
+  },
+  "dependencies": {
+    "@types/es6-promise": "^3.3.0",
+    "@types/node": "^9.4.0"
   },
   "devDependencies": {
-    "css-loader": "^0.25.0",
-    "expose-loader": "^0.7.1",
-    "html-webpack-plugin": "^2.22.0",
-    "nib": "^1.1.2",
-    "pug": "^2.0.0-beta6",
-    "pug-loader": "^2.3.0",
-    "style-loader": "^0.13.1",
-    "stylus": "^0.54.5",
-    "stylus-loader": "^2.3.1",
-    "ts-loader": "^0.8.2",
-    "tslint": "^5.4.3",
-    "tslint-config-standard": "^6.0.1",
-    "typescript": "^2.4.1",
-    "webpack": "^3.0.0"
+    "bootstrap": "^3.3.7",
+    "bootstrap-treeview": "^1.2.0",
+    "jquery": "^3.3.1",
+    "recursive-copy": "^2.0.9",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.56.2",
+    "rollup-plugin-browsersync": "^0.2.6",
+    "rollup-plugin-copy": "^0.2.3",
+    "rollup-plugin-execute": "^1.0.0",
+    "rollup-plugin-typescript2": "^0.11.0",
+    "tslint": "^5.9.1",
+    "tslint-config-standard": "^7.0.0",
+    "typescript": "2.7.1"
+  },
+  "standard": {
+    "ignore": [
+      "demo/data.js"
+    ],
+    "globals": [
+      "DATA_SETS",
+      "Watcher"
+    ]
   }
 }

@@ -1,13 +1,26 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "module": "commonjs",
-    "strict": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "target": "es2015",
+    "lib": [
+      "es2017",
+      "es2016",
+      "dom"
+    ],
     "sourceMap": true,
-    "noEmitHelpers": true
+    "declaration": true,
+    "removeComments": false,
+    "preserveConstEnums": false,
+    "strict": true,
+    "pretty": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "compileOnSave": false,
   "buildOnSave": false
 }

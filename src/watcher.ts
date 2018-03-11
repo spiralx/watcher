@@ -1,16 +1,29 @@
-import { RESET, BOLD, KW, ATTR, VAL, LINK } from './styles'
+import { Css } from './interfaces'
 
-import { getMatchingElements, getElementNodes } from './dom'
+import { WatchCallback, Watch } from './watch'
+import { WatchOptions, WatchEvents } from './watch-options'
 
 // ----------------------------------------------------------
 
 export default class Watcher {
 
-  observer: MutationObserver
+  observer: MutationObserver | null = null
 
-  watches: WatchMap = {}
+  // readonly watcheMap: Map<string, Watch> = new Map()
+  readonly watches: Watch[] = []
 
-  constructor (private readonly root: HTMLElement = document.body, private readonly debug: boolean = false) {
+  // ----------------------------------------------------
+
+  get [Symbol.toStringTag] () {
+    return 'Watcher'
+  }
+
+  // ----------------------------------------------------
+
+  constructor (
+    public readonly root: HTMLElement = document.body,
+    public readonly debug: boolean = false
+  ) {
     if (!(root instanceof HTMLElement)) {
       throw new TypeError('Watch root is not a valid HTML element!')
     }
@@ -18,82 +31,97 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  add (selector: string, callback: Function, context: Object = {}): Watcher {
-    if (this.debug) {
-      console.info(`%cWatcher.add(%c${selector}%c, %o, %c${this.count} watches%c)%c`,
-                   KW, LINK, KW, context || {}, VAL, KW, RESET)
-      console.log(callback.toString())
+  add (callback: WatchCallback): Watch
+  add (options: string | WatchOptions, callback: WatchCallback): Watch
+
+  add (options: string | WatchOptions | WatchCallback, callback?: WatchCallback): Watch {
+    if (typeof options === 'string') {
+      options = {
+        selector: options
+      }
+    } else if (typeof options === 'function') {
+      callback = options
+      options = {}
     }
 
-    context = Object.assign({}, context, { selector })
+    if (!callback) {
+      throw new Error('No callback function specified when calling Watcher.add()')
+    }
 
-    this.watches[selector] = callback.bind(context)
+    if (this.debug) {
+      console.groupCollapsed(`%cWatcher.add(selector: %c${options.selector}%c, %c${this.watchCount} watches%c)`, Css.Kw, Css.Link, Css.Kw, Css.Val, Css.Kw)
+      console.log(callback.toString())
+      if (options) {
+        console.dir(options)
+      }
+      console.groupEnd()
+    }
 
-    return this
+    const watch = new Watch(options, callback)
+
+    this.watches.push(watch)
+
+    return watch
   }
 
   // ----------------------------------------------------
 
-  processSummaries (summaries: MutationRecord[]): void {
-    summaries.forEach(summary => this.processSummary(summary))
+  get observing (): boolean {
+    return !!this.observer
   }
+
+  // ----------------------------------------------------
+
+  get watchCount (): number {
+    return this.watches.length
+  }
+
+  // ----------------------------------------------------
+
+  // get watches (): Watch[] {
+  //   return [ ...this.watchMap.values() ]
+  // }
 
   // ----------------------------------------------------
 
   processSummary (summary: MutationRecord): void {
     if (this.debug) {
-      console.info(`%cWatcher.processSummary(%ctype=%c${summary.type}%c, %o)%c`,
-                   KW, ATTR, VAL, KW, summary, RESET)
+      console.groupCollapsed(`%cWatcher.processSummary(%ctype=%c${summary.type}%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw)
+      console.dir(summary)
+      console.groupEnd()
     }
 
-    const addedElements: HTMLElement[] = getElementNodes(Array.from(summary.addedNodes))
-    const removedElements: HTMLElement[] = getElementNodes(Array.from(summary.removedNodes))
-
-    for (const selector in this.watches) {
-      const matchingAdded: Set<HTMLElement> = new Set(addedElements.reduce((res, elem) => res.concat(getMatchingElements(elem, selector)), []))
-      const matchingRemoved: Set<HTMLElement> = new Set(removedElements.reduce((res, elem) => res.concat(getMatchingElements(elem, selector)), []))
-
-      if (matchingAdded.size || matchingRemoved.size) {
-        this.watches[selector]([...matchingAdded], [...matchingRemoved])
-      }
+    for (const watch of this.watches) {
+      watch.processSummary(summary, this.debug)
     }
   }
 
   // ----------------------------------------------------
 
-  get enabled (): boolean {
-    return !!this.observer
-  }
+  start (): this {
+    if (!this.watchCount) {
+      throw new Error('Cannot start Watcher without any watches!')
+    }
 
-  get count (): number {
-    return Object.keys(this.watches).length
-  }
-
-  // ----------------------------------------------------
-
-  start (): Watcher {
     if (this.debug) {
-      const { enabled, count } = this
-      console.info(`%cWatcher.start(%cenabled = %c${enabled ? 'true' : 'false'}%c, %c${count} watches%c)%c`,
-                   KW, ATTR, VAL, KW, VAL, KW, RESET)
+      console.info(`%cWatcher.start(%cenabled = %c${this.observing ? 'true' : 'false'}%c, %c${this.watchCount} watches%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw, Css.Val, Css.Kw)
     }
 
     if (!this.observer) {
       // Check for existing elements, pass to callback
-      for (const selector in this.watches) {
-        const matchingAdded = getMatchingElements(this.root, selector)
-
-        if (matchingAdded.length) {
-          this.watches[selector](matchingAdded, [])
+      for (const watch of this.watches) {
+        if (watch.findExisting && watch.events & WatchEvents.ElementsAdded) {
+          watch.processElement(this.root)
         }
       }
 
       this.observer = new MutationObserver(summaries => {
-        this.processSummaries(summaries)
+        summaries.forEach(summary => this.processSummary(summary))
       })
 
       this.observer.observe(this.root, {
         childList: true,
+        // attributes: true,
         subtree: true
       })
     }
@@ -103,9 +131,9 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  stop (): Watcher {
+  stop (): this {
     if (this.observer) {
-      this.processSummaries(this.observer.takeRecords())
+      this.observer.takeRecords().forEach(summary => this.processSummary(summary))
 
       this.observer.disconnect()
       this.observer = null
@@ -113,5 +141,4 @@ export default class Watcher {
 
     return this
   }
-
 }
