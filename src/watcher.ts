@@ -92,7 +92,7 @@ export default class Watcher {
     }
 
     for (const watch of this.watches) {
-      watch.processSummary(summary)
+      watch.processSummary(summary, this.debug)
     }
   }
 

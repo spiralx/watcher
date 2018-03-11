@@ -1,4 +1,4 @@
-/* globals Watcher, mocha, should, describe, it, before, beforeEach, afterEach */
+/* globals Watcher, EL, mocha, sinon, should, describe, it, before, beforeEach, afterEach */
 
 /* eslint-disable no-unused-expressions */
 
@@ -15,18 +15,32 @@ describe('Watcher', () => {
   let watcher
   let watch
 
+  window.div = div
+
   const NOOP_CALLBACK = result => {}
+
+  const CB_ARG = cb => cb.getCall(0).args[0]
+
+  const checkResultForNodes = (cb, prop, ...nodes) => {
+    CB_ARG(cb).should.have.property(prop)
+      .which.eql(nodes)
+  }
+
+  function addWatch (selector, options) {
+    const cb = sinon.spy()
+    watcher.add({ selector, ...options }, cb)
+    return cb
+  }
+
+  // ----------------------------------------------------
 
   before(() => {
     div = document.getElementById('test-div')
   })
 
-  // beforeEach(() => {
-  // })
-
   afterEach(() => {
-    if (watcher && watcher.connected) {
-      watcher.disconnect()
+    if (watcher && watcher.observing) {
+      watcher.stop()
     }
 
     div.innerHTML = ''
@@ -34,11 +48,11 @@ describe('Watcher', () => {
     watch = null
   })
 
+  // ----------------------------------------------------
+
   describe('Creating a new Watcher', () => {
     it('should work without parameters', () => {
       watcher = new Watcher()
-
-      console.info(watcher)
 
       watcher.should.be.instanceOf(Watcher)
       watcher.root.should.be.equal(document.body)
@@ -187,6 +201,186 @@ describe('Watcher', () => {
 
       watcher.stop()
       watcher.observing.should.be.false()
+    })
+  })
+
+  describe('Matching existing elements', () => {
+    beforeEach(() => {
+      watcher = new Watcher(div)
+    })
+
+    it('should matching the root node if selector matches', () => {
+      const cb = addWatch('div')
+
+      watcher.start()
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'added', div)
+    })
+
+    it('should match existing nodes in subtree', () => {
+      const cb = addWatch('p')
+
+      const p1 = EL('p', 'Some text.')
+      const p2 = EL('p', 'Some more text.')
+
+      div.appendChild(p1)
+      div.appendChild(EL('div', p2))
+
+      watcher.start()
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'added', p1, p2)
+    })
+
+    it('should not match existing nodes if findExisting is false', () => {
+      const cb = addWatch('p', { findExisting: false })
+
+      const p1 = EL('p', 'Some text.')
+      const p2 = EL('p', 'Some more text.')
+
+      div.appendChild(p1)
+      div.appendChild(EL('div', p2))
+
+      watcher.start()
+      watcher.stop()
+
+      cb.should.not.have.been.called()
+    })
+  })
+
+  describe('Matching added elements', () => {
+    beforeEach(() => {
+      watcher = new Watcher(div)
+    })
+
+    it('should match on tag', () => {
+      const cb = addWatch('span')
+
+      watcher.start()
+
+      const newNode = EL('span')
+      div.appendChild(newNode)
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'added', newNode)
+    })
+
+    it('should not match on other tags', () => {
+      const cb = addWatch('span')
+
+      watcher.start()
+
+      div.appendChild(EL('p'))
+
+      watcher.stop()
+
+      cb.should.not.have.been.called()
+    })
+
+    it('should match on class', () => {
+      const cb = addWatch('.foo')
+
+      watcher.start()
+
+      const newNode = EL('span.foo')
+      div.appendChild(newNode)
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'added', newNode)
+    })
+
+    it('should match on ID', () => {
+      const cb = addWatch('#foo')
+
+      watcher.start()
+
+      const newNode = EL('#foo')
+      div.appendChild(newNode)
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'added', newNode)
+    })
+
+    it('should match on multiple selectors', () => {
+      const cb = addWatch('p, .foo')
+
+      watcher.start()
+
+      const p1 = EL('p.foo')
+      const p2 = EL('.foo')
+      const p3 = EL('p')
+      const newNode = EL('div', p1, p2, p3)
+      div.appendChild(newNode)
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'added', p1, p2, p3)
+    })
+  })
+
+  describe('Matching removed elements', () => {
+    let p1
+    let p2
+    let sp1
+
+    beforeEach(() => {
+      watcher = new Watcher(div)
+
+      p1 = EL('p', 'Some text.')
+      sp1 = EL('span', 'more')
+      p2 = EL('p', 'Some ', sp1, ' text.')
+
+      div.appendChild(p1)
+      div.appendChild(EL('div', p2))
+    })
+
+    it('should match on tag', () => {
+      const cb = addWatch('p', { findExisting: false })
+
+      watcher.start()
+
+      p1.remove()
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'removed', p1)
+    })
+
+    it('should not match on other tags', () => {
+      const cb = addWatch('p', { findExisting: false })
+
+      watcher.start()
+
+      sp1.remove()
+
+      watcher.stop()
+
+      cb.should.not.have.been.called()
+    })
+
+    it('should match multiple removed nodes', () => {
+      const cb = addWatch('p', { findExisting: false })
+
+      watcher.start()
+
+      div.querySelectorAll('p').forEach(e => e.remove())
+
+      watcher.stop()
+
+      cb.should.be.calledTwice()
+      checkResultForNodes(cb, 'removed', p1)
+      cb.getCall(1).args[0].removed.should.eql([ p2 ])
     })
   })
 })

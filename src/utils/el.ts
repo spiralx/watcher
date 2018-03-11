@@ -1,8 +1,13 @@
 
 function parseDefinition (definition: string): HTMLElement {
-  const [ , tag, ...bits ] = definition.split(/\b(?=[\.#])/g)
+  let [ tag, ...bits ] = definition.split(/\b(?=[\.#])/g)
 
-  const element = document.createElement(tag || 'div')
+  if (tag[0] === '#' || tag[0] === '.') {
+    bits.unshift(tag)
+    tag = 'div'
+  }
+
+  const element = document.createElement(tag)
 
   bits.forEach(v => {
     if (v[0] === '.') {
@@ -37,7 +42,7 @@ export type Properties = {
   [ name: string ]: any
 }
 
-export type ELChild = HTMLElement | string | Array<any>
+export type ELChild = Node | string | Array<any> | Properties
 
 // ----------------------------------------------------------
 
@@ -49,28 +54,19 @@ const getClass = (val: any): string => Object.prototype.toString.call(val).slice
  * Function to generated nested HTML elements.
  *
  * @param {string} definition - TAG_NAME[#ID]?[.CLASS_NAME]*[#ID]? - create element with id/classes
- * @param {string|{}} [properties] - if a string, set textContent, otherwise apply all properties
- * @param {Array<Array|Element>} [children] - add children as nodes or the result of another EL
+ * @param {Array<Properties|Node|string|Array>} [children] - if an object use to set properties of element,
+ *                                                           otherwise add a node, text node or the result of
+ *                                                           calling EL using an array as its arguments
  * @return {Element} - constructed element
  */
-export default function EL (definition: string = 'div', properties?: Properties | ELChild, ...children: ELChild[]): HTMLElement {
-  // console.group(`%c${definition}`, BOLD)
-  // console.info(`%cattrs = ${JSON.stringify(properties, null, 2)}`, INV)
-  // // console.info(`%cdata = ${JSON.stringify(data, null, 2)}%c`, INV, RESET)
-  // if (children) {
-  //   console.table(children)
+export default function EL (definition: string = 'div', ...children: ELChild[]): HTMLElement {
+  // console.group(`${definition}`)
+  // for (const child of children) {
+  //   console.log(child)
   // }
   // console.groupEnd()
 
   const element = parseDefinition(definition)
-
-  if (properties) {
-    if (typeof properties === 'object' && !Array.isArray(properties)) {
-      setProperties(element, properties)
-    } else {
-      children.unshift(properties)
-    }
-  }
 
   for (const child of children) {
     if (child instanceof Node) {
@@ -79,6 +75,8 @@ export default function EL (definition: string = 'div', properties?: Properties 
       element.appendChild(EL.apply(null, child))
     } else if (typeof child === 'string') {
       element.appendChild(document.createTextNode(child))
+    } else {
+      setProperties(element, child)
     }
   }
 

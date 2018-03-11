@@ -53,14 +53,34 @@ export class Watch {
 
   // ----------------------------------------------------
 
-  processSummary (summary: MutationRecord): void {
+  processSummary (summary: MutationRecord, debug: boolean = false): void {
     const addedElements = getElementNodesFromNodeList(summary.addedNodes)
     const removedElements = getElementNodesFromNodeList(summary.removedNodes)
 
     const matchingAddedElements: ElementSet = this.processElements(addedElements)
     const matchingRemovedElements: ElementSet = this.processElements(removedElements)
 
-    this.invoke(matchingAddedElements.toArray(), matchingRemovedElements.toArray())
+    if (debug) {
+      console.groupCollapsed(`%cWatch.processSummary(%ctype=%c${summary.type}%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw)
+
+      if (addedElements.length) {
+        console.group(`Added elements`)
+        console.dir(addedElements)
+        console.dir(matchingAddedElements)
+        console.groupEnd()
+      }
+
+      if (removedElements.length) {
+        console.group(`Removed elements`)
+        console.dir(removedElements)
+        console.dir(matchingRemovedElements)
+        console.groupEnd()
+      }
+
+      console.groupEnd()
+    }
+
+    this.invoke(matchingAddedElements.toArray(), matchingRemovedElements.toArray(), debug)
   }
 
   // ----------------------------------------------------
@@ -86,11 +106,17 @@ export class Watch {
 
   // ----------------------------------------------------
 
-  private invoke (added: HTMLElement[], removed: HTMLElement[]) {
+  private invoke (added: HTMLElement[], removed: HTMLElement[], debug: boolean = false) {
     if (added.length > 0 || removed.length > 0) {
       const result = new WatchResult()
       result.added = added
       result.removed = removed
+
+      if (debug) {
+        console.groupCollapsed(`%cWatch.invoke()`, Css.Kw)
+        console.dir(result)
+        console.groupEnd()
+      }
 
       this.callback(result)
       // this.callback.call(this.context, result)
