@@ -1,12 +1,12 @@
 
-export class ElementSet extends Set<HTMLElement> {
+export class ElementSet extends Set<Element> {
   // get [Symbol.toStringTag]: string () {
   //   return 'ElementSet'
   // }
 
   // ----------------------------------------------------
 
-  addAll (elements: HTMLElement[] | ElementSet): this {
+  addAll (elements: Element[] | ElementSet): this {
     for (const element of elements) {
       super.add(element)
     }
@@ -16,7 +16,7 @@ export class ElementSet extends Set<HTMLElement> {
 
   // ----------------------------------------------------
 
-  toArray (): HTMLElement[] {
+  toArray (): Element[] {
     return Array.from(this)
   }
 }
