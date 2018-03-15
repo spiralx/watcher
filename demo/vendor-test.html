@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <title>Vendor Bundle Test</title>
+
+    <link rel="stylesheet" href="/css/bootswatch-darkly.css">
+    <link rel="stylesheet" href="/css/glyphicons.css">
+    <link rel="stylesheet" href="/css/demo.css">
+  </head>
+
+  <body>
+    <div class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
+      <div class="container">
+        <a href="#" class="navbar-brand">Vendor Bundle Test</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="#" onclick="logVersions()">Log globals</a>
+            </li>
+          </ul>
+
+          <ul class="nav navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="http://builtwithbootstrap.com/" target="_blank">Built With Bootstrap</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://wrapbootstrap.com/?ref=bsw" target="_blank">WrapBootstrap</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/vendor.js"></script>
+    <script>
+      function logVersions() {
+        const EXPR = 'color: forestgreen;'
+        const VAL = 'font-weight: bold; color: #9c27b0;' //#e74c3c;'
+
+        console.group(`%clogVersions():%c vendor, jQuery, $, _`, 'font-size: larger; color: forestgreen;', 'font-size: larger; color: #05f;')
+        // console.log(typeof vendor !== 'undefined' ? vendor : 'undefined')
+        // console.log(typeof jQuery !== 'undefined' ? jQuery : 'undefined')
+
+        if (typeof $ !== 'undefined') {
+          console.info(`%c$.fn.jquery %c= %c${$.fn.jquery}`, EXPR, '', VAL)
+          console.dir($)
+        } else {
+          console.warn(`$ is undefined`)
+        }
+
+        if (typeof _ !== 'undefined') {
+          console.info(`%c_.VERSION %c= %c${_.VERSION}`, EXPR, '', VAL)
+          console.dir(_)
+        } else {
+          console.warn(`_ is undefined`)
+        }
+
+        console.groupEnd()
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        logVersions()
+      })
+    </script>
+  </body>
+</html>
