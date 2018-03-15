@@ -8,6 +8,19 @@
     <link rel="stylesheet" href="/css/bootswatch-darkly.css">
     <link rel="stylesheet" href="/css/glyphicons.css">
     <link rel="stylesheet" href="/css/demo.css">
+
+    <style>
+      .versions {
+        font-size: 1.4em;
+      }
+      .var {
+        font-weight: bold;
+        color: #7df;
+      }
+      #jquery, #lodash {
+        color: #ffeb3b;
+      }
+    </style>
   </head>
 
   <body>
@@ -26,39 +39,46 @@
             </li>
           </ul>
 
-          <ul class="nav navbar-nav ml-auto">
+          <ul class="nav navbar-nav ml-auto versions">
             <li class="nav-item">
-              <a class="nav-link" href="http://builtwithbootstrap.com/" target="_blank">Built With Bootstrap</a>
+              <a class="nav-link" href="#"><span class="var">$</span> = <span id="jquery">undefined</span></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="https://wrapbootstrap.com/?ref=bsw" target="_blank">WrapBootstrap</a>
+              <a class="nav-link" href="#"><span class="var">_</span> = <span id="lodash">undefined</span></a>
             </li>
           </ul>
         </div>
       </div>
     </div>
 
-    <script src="/js/vendor.js"></script>
+    <script src="/js/vendor.min.js"></script>
     <script>
       function logVersions() {
         const EXPR = 'color: forestgreen;'
         const VAL = 'font-weight: bold; color: #9c27b0;' //#e74c3c;'
+
+        const jqueryElem = document.querySelector('#jquery')
+        const lodashElem = document.querySelector('#lodash')
 
         console.group(`%clogVersions():%c vendor, jQuery, $, _`, 'font-size: larger; color: forestgreen;', 'font-size: larger; color: #05f;')
         // console.log(typeof vendor !== 'undefined' ? vendor : 'undefined')
         // console.log(typeof jQuery !== 'undefined' ? jQuery : 'undefined')
 
         if (typeof $ !== 'undefined') {
+          jqueryElem.textContent = `v${$.fn.jquery}`
           console.info(`%c$.fn.jquery %c= %c${$.fn.jquery}`, EXPR, '', VAL)
           console.dir($)
         } else {
+          jqueryElem.textContent = 'undefined'
           console.warn(`$ is undefined`)
         }
 
         if (typeof _ !== 'undefined') {
+          lodashElem.textContent = `v${_.VERSION}`
           console.info(`%c_.VERSION %c= %c${_.VERSION}`, EXPR, '', VAL)
           console.dir(_)
         } else {
+          lodashElem.textContent = 'undefined'
           console.warn(`_ is undefined`)
         }
 

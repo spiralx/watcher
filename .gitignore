@@ -1,6 +1,6 @@
 coverage/
 dist/
-demo/js/vendor.js
+demo/js/vendor.*
 demo/js/watcher.js
 
 node_modules/

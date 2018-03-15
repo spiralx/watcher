@@ -1,5 +1,9 @@
 import resolve from 'rollup-plugin-node-resolve'
 import commonjs from 'rollup-plugin-commonjs'
+
+import filesize from 'rollup-plugin-filesize'
+import minify from 'rollup-plugin-minify-es'
+
 import execute from 'rollup-plugin-execute'
 import browsersync from 'rollup-plugin-browsersync'
 
@@ -9,15 +13,10 @@ export default {
   input: 'src/vendor.js',
 
   output: {
-    file: 'dist/vendor.js',
+    file: 'dist/vendor.min.js',
     format: 'iife',
-    name: 'self',
-    extend: true,
-    sourcemap: 'inline',
-    // globals: {
-    //   jquery: '$',
-    //   lodash: '_'
-    // }
+    name: 'vendor',
+    sourcemap: true
   },
 
   plugins: [
@@ -27,8 +26,14 @@ export default {
       }
     }),
     commonjs(),
+    filesize(),
 
-    execute('cp dist/vendor.js demo/js'),
+    minify({
+      mangle: false,
+      keep_classnames: true
+    }),
+
+    execute('cp --remove-destination dist/vendor.* demo/js'),
     browsersync({
       server: 'demo',
       startPath: '/vendor-test.html',
