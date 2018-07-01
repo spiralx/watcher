@@ -1,6 +1,5 @@
-/* globals Watcher, EL, mocha, sinon, should, describe, it, before, beforeEach, afterEach */
-
-/* eslint-disable no-unused-expressions */
+/* eslint-disable no-unused-expressions, no-unused-vars */
+/* globals Watcher, EL, mocha, sinon, should, describe, it, before, after, beforeEach, afterEach */
 
 mocha.setup({
   ui: 'bdd',
@@ -15,7 +14,7 @@ describe('Watcher', () => {
   let watcher
   let watch
 
-  window.div = div
+  window.div = div = document.getElementById('test-div')
 
   const NOOP_CALLBACK = result => {}
 
@@ -32,19 +31,21 @@ describe('Watcher', () => {
     return cb
   }
 
-  // ----------------------------------------------------
-
-  before(() => {
-    div = document.getElementById('test-div')
-  })
-
-  afterEach(() => {
+  function closeWatcher () {
     if (watcher && watcher.observing) {
       watcher.stop()
     }
 
-    div.innerHTML = ''
     watcher = null
+  }
+
+  // ----------------------------------------------------
+
+  beforeEach(() => {
+    div.innerHTML = ''
+  })
+
+  afterEach(() => {
     watch = null
   })
 
@@ -85,6 +86,10 @@ describe('Watcher', () => {
   describe('Adding watches', () => {
     beforeEach(() => {
       watcher = new Watcher(div)
+    })
+
+    afterEach(() => {
+      closeWatcher()
     })
 
     it('should throw an error if no callback passed', () => {
@@ -148,6 +153,10 @@ describe('Watcher', () => {
       watcher = new Watcher(div)
     })
 
+    afterEach(() => {
+      closeWatcher()
+    })
+
     it('start() should throw an error if no watches', () => {
       (() => watcher.start()).should.throw(Error)
 
@@ -209,6 +218,10 @@ describe('Watcher', () => {
       watcher = new Watcher(div)
     })
 
+    afterEach(() => {
+      closeWatcher()
+    })
+
     it('should matching the root node if selector matches', () => {
       const cb = addWatch('div')
 
@@ -254,6 +267,10 @@ describe('Watcher', () => {
   describe('Matching added elements', () => {
     beforeEach(() => {
       watcher = new Watcher(div)
+    })
+
+    afterEach(() => {
+      closeWatcher()
     })
 
     it('should match on tag', () => {
