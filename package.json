@@ -26,9 +26,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "rollup -c rollup.build.config.js",
-    "watch": "rollup -c -w",
-    "build-prod": "rollup -c rollup.production.config.js",
-    "build-el": "rollup -c rollup.test.config.js",
+    "test": "rollup -c rollup.test.config.js",
     "lint": "tslint -c ./tslint.json src/*.ts",
     "start": "rollup -c -w"
   },
