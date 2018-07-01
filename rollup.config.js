@@ -1,6 +1,6 @@
 import typescript from 'rollup-plugin-typescript2'
 // import copy from 'rollup-plugin-copy'
-import execute from 'rollup-plugin-execute'
+// import execute from 'rollup-plugin-execute'
 import browsersync from 'rollup-plugin-browsersync'
 
 require('colors')
@@ -37,16 +37,22 @@ export default {
 
   plugins: [
     typescript(),
+
     // copy({
     //   'dist/watcher.js': 'demo/js/watcher.js'
     // }),
-    execute('cp dist/watcher.js demo/js'),
+    // execute('cp dist/watcher.js demo/js'),
+
     browsersync({
-      server: 'demo',
+      server: [
+        'demo',
+        'dist'
+      ],
       files: [
         'demo/index.html',
         'demo/css/*.css',
-        'demo/js/*.js'
+        'demo/js/*.js',
+        'dist/watcher.js'
       ],
       port: 9000
     })
