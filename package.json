@@ -1,9 +1,9 @@
 {
   "name": "watcher",
   "version": "0.0.1",
-  "main": "dist/watcher.cjs.js",
+  "main": "dist/watcher.js",
   "module": "dist/watcher.esm.js",
-  "browser": "dist/watcher.js",
+  "browser": "dist/watcher.umd.js",
   "description": "DOM mutation watcher library",
   "author": "James Skinner <spiralx@gmail.com> (https://github.com/spiralx)",
   "license": "MIT",

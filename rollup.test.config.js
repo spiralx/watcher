@@ -1,6 +1,8 @@
 import typescript from 'rollup-plugin-typescript2'
 import browsersync from 'rollup-plugin-browsersync'
 
+import { COMMON_BUILD_OPTIONS, getBrowserSyncConfig } from './config/build-config'
+
 // --------------------------------------------------------------------
 
 export default {
@@ -8,7 +10,7 @@ export default {
 
   output: {
     format: 'iife',
-    file: 'dist/el/el.js',
+    file: 'dist/el.js',
     name: 'EL'
   },
 
@@ -18,22 +20,9 @@ export default {
         declaration: false
       }
     }),
-    browsersync({
-      server: [
-        'test',
-        'dist'
-      ],
-      files: [
-        'test/index.html',
-        'test/tests.js',
-        'dist/watcher.js',
-        'dist/el/el.js'
-      ],
-      port: 9090
-    })
+
+    browsersync(getBrowserSyncConfig(9090, 'test', 'dist/watcher.umd.js', 'dist/el.js'))
   ],
 
-  watch: {
-    clearScreen: false
-  }
+  ...COMMON_BUILD_OPTIONS
 }
