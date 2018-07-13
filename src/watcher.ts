@@ -1,3 +1,5 @@
+import { throttle } from 'lodash-es'
+
 import { Css } from './interfaces'
 
 import { WatchCallback, Watch } from './watch'
@@ -5,9 +7,16 @@ import { WatchOptions } from './watch-options'
 
 // ----------------------------------------------------------
 
+const DEBOUNCE_TIME = 250
+
+// ----------------------------------------------------------
+
 export default class Watcher {
 
-  observer: MutationObserver | null = null
+  observer: MutationObserver
+  observing: boolean = false
+
+  mutationQueue: MutationRecord[] = []
 
   readonly watches: Watch[] = []
 
@@ -26,6 +35,13 @@ export default class Watcher {
     if (!(root instanceof HTMLElement)) {
       throw new TypeError('Watch root is not a valid HTML element!')
     }
+
+    this.observer = new MutationObserver(records => {
+      this.addRecords(records)
+      this.processRecords()
+    })
+
+    this.processRecords = throttle(this.processRecords.bind(this), DEBOUNCE_TIME, { leading: true })
   }
 
   // ----------------------------------------------------
@@ -69,8 +85,36 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  get observing (): boolean {
-    return !!this.observer
+  addRecords (records: MutationRecord[]) {
+    this.mutationQueue.push(...records)
+
+    if (this.debug) {
+      console.info(`Adding ${records.length} records to queue, queue has ${this.mutationQueue.length} records`)
+    }
+  }
+
+  // ----------------------------------------------------
+
+  processRecords () {
+    if (this.mutationQueue.length > 0) {
+      if (this.debug) {
+        console.info(`Processing ${this.mutationQueue.length} records`)
+      }
+
+      if (this.observing) {
+        this.addRecords(this.disconnect())
+      }
+
+      for (const watch of this.watches) {
+        watch.processRecords(this.mutationQueue)
+      }
+
+      this.mutationQueue = []
+
+      if (this.observing) {
+        this.observe()
+      }
+    }
   }
 
   // ----------------------------------------------------
@@ -90,26 +134,14 @@ export default class Watcher {
       console.info(`%cWatcher.start(%cenabled = %c${this.observing ? 'true' : 'false'}%c, %c${this.watchCount} watches%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw, Css.Val, Css.Kw)
     }
 
-    if (!this.observer) {
+    if (!this.observing) {
       // Check for existing elements, pass to callback
       for (const watch of this.watches) {
         watch.processExistingElements()
       }
 
-      this.observer = new MutationObserver(summaries => {
-        for (const watch of this.watches) {
-          watch.processRecords(summaries)
-        }
-      })
-
-      this.observer.observe(this.root, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeOldValue: true,
-        characterData: true,
-        characterDataOldValue: true
-      })
+      this.observe()
+      this.observing = true
     }
 
     return this
@@ -118,17 +150,37 @@ export default class Watcher {
   // ----------------------------------------------------
 
   stop (): this {
-    if (this.observer) {
-      const records = this.observer.takeRecords()
-      this.observer.disconnect()
+    if (this.observing) {
+      this.addRecords(this.disconnect())
 
-      for (const watch of this.watches) {
-        watch.processRecords(records)
-      }
+      this.observing = false
 
-      this.observer = null
+      this.processRecords()
     }
 
     return this
+  }
+
+  // ----------------------------------------------------
+
+  private observe (): void {
+    this.observer.observe(this.root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeOldValue: true,
+      characterData: true,
+      characterDataOldValue: true
+    })
+  }
+
+  // ----------------------------------------------------
+
+  private disconnect (): MutationRecord[] {
+    const records = this.observer.takeRecords()
+
+    this.observer.disconnect()
+
+    return records
   }
 }

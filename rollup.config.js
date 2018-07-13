@@ -1,5 +1,6 @@
 import typescript from 'rollup-plugin-typescript2'
 import browsersync from 'rollup-plugin-browsersync'
+import resolve from 'rollup-plugin-node-resolve'
 
 import { COMMON_BUILD_OPTIONS, BUILD_OUTPUT_TARGETS, getBrowserSyncConfig } from './config/build-config'
 
@@ -11,6 +12,8 @@ const config = {
   output: BUILD_OUTPUT_TARGETS,
 
   plugins: [
+    resolve(),
+
     typescript(),
 
     browsersync(getBrowserSyncConfig(9000, 'demo'))

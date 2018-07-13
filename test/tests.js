@@ -381,7 +381,6 @@ describe('Watcher', () => {
 
     it('should not match elements added in the callback', () => {
       const cb = sinon.spy(result => {
-        console.log(p1.childElementCount, result)
         if (p1.childElementCount === 0) {
           p1.appendChild(p2)
         }
@@ -395,8 +394,6 @@ describe('Watcher', () => {
       div.appendChild(p1)
 
       watcher.stop()
-
-      console.log(div.innerHTML)
 
       cb.should.be.calledOnce()
       checkResultForNodes(cb, 'added', p1)
