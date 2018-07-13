@@ -1,23 +1,11 @@
 
 // ----------------------------------------------------
 
-export interface MatchOptions {
-  root?: Element
-  selector?: string
-}
-
-// ----------------------------------------------------
-
 export class Matcher {
-  readonly root: Element
-  readonly selector: string
-
-  // ----------------------------------------------------
-
-  constructor (options: MatchOptions = {}) {
-    this.root = options.root || document.body
-    this.selector = options.selector || '*'
-  }
+  constructor (
+    public readonly root: Element,
+    public readonly selector: string = '*'
+  ) {}
 
   // ----------------------------------------------------
 

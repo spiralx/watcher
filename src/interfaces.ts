@@ -24,7 +24,7 @@ export interface INode {
 
 // ----------------------------------------------------
 
-export interface NodeMutation {
+export interface NodeMutationRecord {
   type: 'childList'
   target: Node
   addedNodes: NodeList
@@ -33,7 +33,7 @@ export interface NodeMutation {
   nextSibling: Node | null
 }
 
-export interface AttrMutation {
+export interface AttrMutationRecord {
   type: 'attributes'
   target: Node
   attributeName: string
@@ -41,10 +41,10 @@ export interface AttrMutation {
   oldValue: string
 }
 
-export interface TextMutation {
+export interface TextMutationRecord {
   type: 'characterData'
   target: Node
   oldValue: string
 }
 
-export type Mutation = NodeMutation | AttrMutation | TextMutation
+export type MutationRecords = NodeMutationRecord | AttrMutationRecord | TextMutationRecord

@@ -1,7 +1,7 @@
-import { Css, Mutation } from './interfaces'
+import { Css } from './interfaces'
 
 import { WatchCallback, Watch } from './watch'
-import { WatchOptions, WatchEvents } from './watch-options'
+import { WatchOptions } from './watch-options'
 
 // ----------------------------------------------------------
 
@@ -9,7 +9,6 @@ export default class Watcher {
 
   observer: MutationObserver | null = null
 
-  // readonly watcheMap: Map<string, Watch> = new Map()
   readonly watches: Watch[] = []
 
   // ----------------------------------------------------
@@ -78,26 +77,6 @@ export default class Watcher {
 
   // ----------------------------------------------------
 
-  // get watches (): Watch[] {
-  //   return [ ...this.watchMap.values() ]
-  // }
-
-  // ----------------------------------------------------
-
-  // processSummary (summary: MutationRecord): void {
-  //   if (this.debug) {
-  //     console.groupCollapsed(`%cWatcher.processSummary(%ctype=%c${summary.type}%c)`, Css.Kw, Css.Attr, Css.Val, Css.Kw)
-  //     console.dir(summary)
-  //     console.groupEnd()
-  //   }
-
-  //   for (const watch of this.watches) {
-  //     watch.processSummary(summary, this.debug)
-  //   }
-  // }
-
-  // ----------------------------------------------------
-
   start (): this {
     if (!this.watchCount) {
       throw new Error('Cannot start Watcher without any watches!')
@@ -110,21 +89,18 @@ export default class Watcher {
     if (!this.observer) {
       // Check for existing elements, pass to callback
       for (const watch of this.watches) {
-        if (watch.findExisting && watch.events & WatchEvents.ElementsAdded) {
-          watch.processExistingElements()
-        }
+        watch.processExistingElements()
       }
 
       this.observer = new MutationObserver(summaries => {
         for (const watch of this.watches) {
           watch.processRecords(summaries)
         }
-        // summaries.forEach(summary => this.processSummary(summary))
       })
 
       this.observer.observe(this.root, {
-        subtree: true,
         childList: true,
+        subtree: true,
         attributes: true,
         attributeOldValue: true,
         characterData: true,
@@ -139,8 +115,6 @@ export default class Watcher {
 
   stop (): this {
     if (this.observer) {
-      // this.observer.takeRecords().forEach(summary => this.processSummary(summary))
-
       const records = this.observer.takeRecords()
       this.observer.disconnect()
 
