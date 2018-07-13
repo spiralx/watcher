@@ -17,11 +17,17 @@ export function getSelectorFunction (selector: string): SelectorFunc {
 // ----------------------------------------------------
 
 export function getElementNodesFromNodeList (nodes: NodeList): HTMLElement[] {
-  return getElementNodes(Array.from(nodes))
+  return getNodesByType<HTMLElement>(nodes, 1)
 }
 
 // ----------------------------------------------------
 
-export function getElementNodes (nodes: Node[]): HTMLElement[] {
-  return nodes.filter(node => node instanceof HTMLElement) as HTMLElement[]
+export function getTextNodesFromNodeList (nodes: NodeList): Text[] {
+  return getNodesByType<Text>(nodes, 3)
+}
+
+// ----------------------------------------------------
+
+export function getNodesByType<T extends Node> (nodes: NodeList, nodeType: number): T[] {
+  return Array.from(nodes).filter(node => node.nodeType === nodeType) as T[]
 }

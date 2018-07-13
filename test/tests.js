@@ -1,6 +1,5 @@
-/* globals Watcher, EL, mocha, sinon, should, describe, it, before, beforeEach, afterEach */
-
-/* eslint-disable no-unused-expressions */
+/* eslint-disable no-unused-expressions, no-unused-vars */
+/* globals Watcher, EL, mocha, sinon, should, describe, it, before, after, beforeEach, afterEach */
 
 mocha.setup({
   ui: 'bdd',
@@ -15,7 +14,7 @@ describe('Watcher', () => {
   let watcher
   let watch
 
-  window.div = div
+  window.div = div = document.getElementById('test-div')
 
   const NOOP_CALLBACK = result => {}
 
@@ -26,31 +25,68 @@ describe('Watcher', () => {
       .which.eql(nodes)
   }
 
-  function addWatch (selector, options) {
+  const checkResultForChanges = (cb, prop, ...changes) => {
+    const result = CB_ARG(cb)
+
+    result.should.have.property(prop)
+      .and.have.property('length')
+      .which.equals(changes.length)
+
+    for (let i = 0; i < changes.length; i++) {
+      const resultChange = result[ prop ][ i ]
+
+      for (const [ key, value ] of Object.entries(changes[ i ])) {
+        resultChange.should.have.property(key)
+          .which.eql(value)
+      }
+    }
+  }
+
+  function addWatch (selector, options = {}) {
+    if (typeof selector === 'string') {
+      options.selector = selector
+    } else {
+      options = selector
+    }
+
     const cb = sinon.spy()
-    watcher.add({ selector, ...options }, cb)
+    watcher.add(options, cb)
     return cb
   }
 
-  // ----------------------------------------------------
+  function changeOpts (options) {
+    return {
+      findExisting: false,
+      events: 15,
+      ...options
+    }
+  }
 
-  before(() => {
-    div = document.getElementById('test-div')
-  })
-
-  afterEach(() => {
+  function closeWatcher () {
     if (watcher && watcher.observing) {
       watcher.stop()
     }
 
-    div.innerHTML = ''
     watcher = null
+  }
+
+  // ----------------------------------------------------
+
+  beforeEach(() => {
+    div.innerHTML = ''
+  })
+
+  afterEach(() => {
     watch = null
   })
 
   // ----------------------------------------------------
 
   describe('Creating a new Watcher', () => {
+    afterEach(() => {
+      closeWatcher()
+    })
+
     it('should work without parameters', () => {
       watcher = new Watcher()
 
@@ -85,6 +121,10 @@ describe('Watcher', () => {
   describe('Adding watches', () => {
     beforeEach(() => {
       watcher = new Watcher(div)
+    })
+
+    afterEach(() => {
+      closeWatcher()
     })
 
     it('should throw an error if no callback passed', () => {
@@ -148,6 +188,10 @@ describe('Watcher', () => {
       watcher = new Watcher(div)
     })
 
+    afterEach(() => {
+      closeWatcher()
+    })
+
     it('start() should throw an error if no watches', () => {
       (() => watcher.start()).should.throw(Error)
 
@@ -209,6 +253,10 @@ describe('Watcher', () => {
       watcher = new Watcher(div)
     })
 
+    afterEach(() => {
+      closeWatcher()
+    })
+
     it('should matching the root node if selector matches', () => {
       const cb = addWatch('div')
 
@@ -254,6 +302,10 @@ describe('Watcher', () => {
   describe('Matching added elements', () => {
     beforeEach(() => {
       watcher = new Watcher(div)
+    })
+
+    afterEach(() => {
+      closeWatcher()
     })
 
     it('should match on tag', () => {
@@ -344,6 +396,10 @@ describe('Watcher', () => {
       div.appendChild(EL('div', p2))
     })
 
+    afterEach(() => {
+      closeWatcher()
+    })
+
     it('should match on tag', () => {
       const cb = addWatch('p', { findExisting: false })
 
@@ -378,9 +434,187 @@ describe('Watcher', () => {
 
       watcher.stop()
 
-      cb.should.be.calledTwice()
-      checkResultForNodes(cb, 'removed', p1)
-      cb.getCall(1).args[0].removed.should.eql([ p2 ])
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'removed', p1, p2)
+    })
+  })
+
+  describe('Match attribute changes', () => {
+    let p1
+    let p2
+    let sp1
+
+    beforeEach(() => {
+      watcher = new Watcher(div)
+
+      p1 = EL('p', { 'id': 'foo' }, 'Some bold text.')
+      p2 = EL('p', 'Some plain text.')
+
+      div.appendChild(p1)
+      div.appendChild(p2)
+    })
+
+    afterEach(() => {
+      closeWatcher()
+    })
+
+    it('should match an attribute change on any element', () => {
+      const cb = addWatch(changeOpts({ attribute: 'id' }))
+
+      watcher.start()
+
+      p1.setAttribute('id', 'bar')
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForChanges(cb, 'attributeChanges', {
+        element: p1,
+        name: 'id',
+        value: 'bar',
+        oldValue: 'foo'
+      })
+    })
+
+    it('should match a new attribute on any element', () => {
+      const cb = addWatch(changeOpts({ attribute: 'id' }))
+
+      watcher.start()
+
+      p2.setAttribute('id', 'bar')
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForChanges(cb, 'attributeChanges', {
+        element: p2,
+        name: 'id',
+        value: 'bar',
+        oldValue: null
+      })
+    })
+
+    it('should match a removed attribute on any element', () => {
+      const cb = addWatch(changeOpts({ attribute: 'id' }))
+
+      watcher.start()
+
+      p1.removeAttribute('id')
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForChanges(cb, 'attributeChanges', {
+        element: p1,
+        name: 'id',
+        value: null,
+        oldValue: 'foo'
+      })
+    })
+
+    it('should match multiple attribute changes across elements', () => {
+      const cb = addWatch(changeOpts({ attribute: 'id' }))
+
+      watcher.start()
+
+      p1.setAttribute('id', 'bar')
+      p2.setAttribute('id', 'bar')
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForChanges(cb, 'attributeChanges', {
+        element: p1,
+        name: 'id',
+        value: 'bar',
+        oldValue: 'foo'
+      }, {
+        element: p2,
+        name: 'id',
+        value: 'bar',
+        oldValue: null
+      })
+    })
+
+    it('should match multiple different attribute changes across elements', () => {
+      const cb = addWatch(changeOpts({ attributes: [ 'id', 'name' ] }))
+
+      watcher.start()
+
+      p1.setAttribute('id', 'bar')
+      p2.setAttribute('name', 'p2')
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForChanges(cb, 'attributeChanges', {
+        element: p1,
+        name: 'id',
+        value: 'bar',
+        oldValue: 'foo'
+      }, {
+        element: p2,
+        name: 'name',
+        value: 'p2',
+        oldValue: null
+      })
+    })
+  })
+
+  describe('Match text changes', () => {
+    let p1
+    let p2
+    let sp1
+
+    beforeEach(() => {
+      watcher = new Watcher(div)
+
+      p1 = EL('p', 'Some text')
+
+      div.appendChild(p1)
+    })
+
+    afterEach(() => {
+      closeWatcher()
+    })
+
+    it('should match a text change on any element', () => {
+      const cb = addWatch(changeOpts({}))
+
+      watcher.start()
+
+      p1.textContent = 'New text'
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForChanges(cb, 'textChanges', {
+        element: p1,
+        value: 'New text',
+        oldValue: 'Some text'
+      })
+    })
+
+    it('should match multiple text changes on any element', () => {
+      const cb = addWatch(changeOpts({}))
+
+      watcher.start()
+
+      p1.textContent = 'Mid text'
+      p1.textContent = 'New text'
+
+      watcher.stop()
+
+      cb.should.be.calledOnce()
+      checkResultForChanges(cb, 'textChanges', {
+        element: p1,
+        value: 'Mid text',
+        oldValue: 'Some text'
+      }, {
+        element: p1,
+        value: 'New text',
+        oldValue: 'Mid text'
+      })
     })
   })
 })

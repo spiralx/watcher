@@ -1,24 +1,34 @@
+import Watcher from './watcher'
 
 // ----------------------------------------------------
 
-export interface AttributeChange {
-  target: HTMLElement
-  attribute: string
-  value: string | SVGNumberList
+export class AttributeChange {
+  constructor (
+    public element: Element,
+    public name: string,
+    public value: string | null,
+    public oldValue: string | null
+  ) {}
 }
 
 // ----------------------------------------------------
 
-export interface TextChange {
-  target: HTMLElement
-  text: string
+export class TextChange {
+  constructor (
+    public element: Element,
+    public value: string | null,
+    public oldValue: string | null
+  ) {}
 }
 
 // ----------------------------------------------------
 
 export class WatchResult {
-  added: Array<HTMLElement> = new Array<HTMLElement>()
-  removed: Array<HTMLElement> = new Array<HTMLElement>()
-  attributeChanges: Array<AttributeChange> = new Array<AttributeChange>()
-  textChanges: Array<TextChange> = new Array<TextChange>()
+  constructor (
+    private parent: Watcher,
+    public added: Element[],
+    public removed: Element[] = [],
+    public attributeChanges: AttributeChange[] = [],
+    public textChanges: TextChange[] = []
+  ) {}
 }

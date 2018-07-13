@@ -21,3 +21,30 @@ export namespace Css {
 export interface INode {
   nodes?: INode[]
 }
+
+// ----------------------------------------------------
+
+export interface NodeMutationRecord {
+  type: 'childList'
+  target: Node
+  addedNodes: NodeList
+  removedNodes: NodeList
+  previousSibling: Node | null
+  nextSibling: Node | null
+}
+
+export interface AttrMutationRecord {
+  type: 'attributes'
+  target: Node
+  attributeName: string
+  attributeNamespace: string
+  oldValue: string
+}
+
+export interface TextMutationRecord {
+  type: 'characterData'
+  target: Node
+  oldValue: string
+}
+
+export type MutationRecords = NodeMutationRecord | AttrMutationRecord | TextMutationRecord

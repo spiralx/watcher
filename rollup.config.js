@@ -1,70 +1,27 @@
 import typescript from 'rollup-plugin-typescript2'
-// import copy from 'rollup-plugin-copy'
-import execute from 'rollup-plugin-execute'
 import browsersync from 'rollup-plugin-browsersync'
 
-require('colors')
+import { COMMON_BUILD_OPTIONS, BUILD_OUTPUT_TARGETS, getBrowserSyncConfig } from './config/build-config'
 
 // --------------------------------------------------------------------
 
-const pkg = require('./package.json')
-
-// --------------------------------------------------------------------
-
-export default {
+const config = {
   input: 'src/index.ts',
 
-  output: [
-    {
-      format: 'iife',
-      file: pkg.browser,
-      name: 'Watcher',
-      sourcemap: 'inline'
-    },
-
-    {
-      format: 'cjs',
-      file: pkg.main,
-      sourcemap: true
-    },
-
-    {
-      format: 'es',
-      file: pkg.module,
-      sourcemap: true
-    }
-  ],
+  output: BUILD_OUTPUT_TARGETS,
 
   plugins: [
     typescript(),
-    // copy({
-    //   'dist/watcher.js': 'demo/js/watcher.js'
-    // }),
-    execute('cp dist/watcher.js demo/js'),
-    browsersync({
-      server: 'demo',
-      files: [
-        'demo/index.html',
-        'demo/css/*.css',
-        'demo/js/*.js'
-      ],
-      port: 9000
-    })
+
+    browsersync(getBrowserSyncConfig(9000, 'demo'))
+
+    // browsersync(getBrowserSyncConfig(9000, 'demo', 'dist/watcher.umd.js')),
+    // browsersync(getBrowserSyncConfig(9090, 'test', 'dist/watcher.umd.js'))
   ],
 
-  onwarn: warning => {
-    const loc = warning.loc
-      ? ` ${warning.loc.file} (${warning.loc.line}:${warning.loc.column}`
-      : ``
-
-    console.warn(`WARNING‼ `.red + warning.code.magenta.bold + `${loc} : ${warning.message.cyan.bold}`)
-    console.dir(warning)
-    // if (Object.keys(data).length) {
-    //   console.dir(data)
-    // }
-  },
-
-  watch: {
-    clearScreen: false
-  }
+  ...COMMON_BUILD_OPTIONS
 }
+
+console.dir(config)
+
+export default config

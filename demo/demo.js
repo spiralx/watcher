@@ -67,7 +67,7 @@ class DemoRunner {
     console.info(`Callback:`)
     console.dir(callback)
 
-    const watch = this._watcher.add({ selector: '.list-group-item' }, callback)
+    const watch = this._watcher.add({ selector: '.list-group-item', events: 15 }, callback)
 
     console.info(`Watch:`)
     console.dir(watch)
