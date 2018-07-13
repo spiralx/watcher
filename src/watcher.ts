@@ -58,6 +58,10 @@ export default class Watcher {
 
     const watch = new Watch(this, options, callback)
 
+    if (this.observing) {
+      watch.processExistingElements()
+    }
+
     this.watches.push(watch)
 
     return watch
