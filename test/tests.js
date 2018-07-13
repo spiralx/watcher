@@ -378,6 +378,29 @@ describe('Watcher', () => {
       cb.should.be.calledOnce()
       checkResultForNodes(cb, 'added', p1, p2, p3)
     })
+
+    it('should not match elements added in the callback', () => {
+      const cb = sinon.spy(result => {
+        console.log(p1.childElementCount, result)
+        if (p1.childElementCount === 0) {
+          p1.appendChild(p2)
+        }
+      })
+
+      watcher.add('p', cb)
+      watcher.start()
+
+      const p1 = EL('p.foo')
+      const p2 = EL('p.bar')
+      div.appendChild(p1)
+
+      watcher.stop()
+
+      console.log(div.innerHTML)
+
+      cb.should.be.calledOnce()
+      checkResultForNodes(cb, 'added', p1)
+    })
   })
 
   describe('Matching removed elements', () => {
