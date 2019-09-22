@@ -38,7 +38,7 @@
   "devDependencies": {
     "bootstrap": "^3.3.7",
     "bootstrap-treeview": "^1.2.0",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.0",
     "lodash-es": "^4.17.10",
     "recursive-copy": "^2.0.9",
     "rimraf": "^2.6.2",
