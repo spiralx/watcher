@@ -39,7 +39,7 @@
     "bootstrap": "^3.3.7",
     "bootstrap-treeview": "^1.2.0",
     "jquery": "^3.3.1",
-    "lodash-es": "^4.17.10",
+    "lodash-es": "^4.17.21",
     "recursive-copy": "^2.0.9",
     "rimraf": "^2.6.2",
     "rollup": "^0.56.2",
